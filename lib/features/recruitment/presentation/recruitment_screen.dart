@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/constants/app_strings.dart';
 import '../../../core/errors/app_failure.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/widgets/hk_pagination_bar.dart';
 import '../../../core/widgets/hk_state_views.dart';
 import '../domain/recruitment_models.dart';
 import 'recruitment_controller.dart';
@@ -130,10 +131,26 @@ class _RecruitmentScreenState extends ConsumerState<RecruitmentScreen> {
                 );
               },
               data: (viewState) {
-                return RefreshIndicator(
-                  onRefresh: () =>
-                      ref.read(recruitmentControllerProvider.notifier).refresh(),
-                  child: _buildListContent(viewState),
+                return Column(
+                  children: [
+                    Expanded(
+                      child: RefreshIndicator(
+                        onRefresh: () => ref
+                            .read(recruitmentControllerProvider.notifier)
+                            .refresh(),
+                        child: _buildListContent(viewState),
+                      ),
+                    ),
+                    if (viewState.totalCount > 0)
+                      HkPaginationBar(
+                        currentPage: viewState.page,
+                        totalCount: viewState.totalCount,
+                        pageSize: viewState.pageSize,
+                        onPageChanged: (p) => ref
+                            .read(recruitmentControllerProvider.notifier)
+                            .goToPage(p),
+                      ),
+                  ],
                 );
               },
             ),

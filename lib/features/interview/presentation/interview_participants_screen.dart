@@ -5,25 +5,36 @@ import '../../../core/constants/app_strings.dart';
 import '../../../core/constants/form_strings.dart';
 import '../../../core/errors/app_failure.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/widgets/hk_pagination_bar.dart';
 import '../../../core/widgets/hk_state_views.dart';
 import '../../recruitment/presentation/widgets/applicant_profile_bottom_sheet.dart';
 import '../data/interview_repository.dart';
 import '../domain/interview_models.dart';
 import 'widgets/interview_evaluation_sheet.dart';
 
+typedef InterviewParticipantsParams = ({
+  String interviewId,
+  String vacancyCode,
+  String interviewCode,
+  int page,
+  String searchQuery,
+});
+
 final interviewParticipantsProvider = FutureProvider.autoDispose
-    .family<List<InterviewCandidateItem>, (String, String, String)>(
+    .family<PaginatedList<InterviewCandidateItem>, InterviewParticipantsParams>(
         (ref, params) async {
-  final (interviewId, vacancyCode, interviewCode) = params;
   final repo = ref.watch(interviewRepositoryProvider);
   final res = await repo.fetchInterviewParticipants(
-    interviewId,
-    vacancyCode: vacancyCode,
-    interviewCode: interviewCode,
+    params.interviewId,
+    vacancyCode: params.vacancyCode,
+    interviewCode: params.interviewCode,
+    page: params.page,
+    limit: 20,
+    searchQuery: params.searchQuery,
   );
   switch (res) {
     case Success<PaginatedList<InterviewCandidateItem>>(:final data):
-      return data.items;
+      return data;
     case Failure<PaginatedList<InterviewCandidateItem>>(:final error):
       throw error;
   }
@@ -50,11 +61,14 @@ class _InterviewParticipantsScreenState
     extends ConsumerState<InterviewParticipantsScreen> {
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
+  int _page = 1;
 
-  (String, String, String) get _params => (
-        widget.interviewId,
-        widget.vacancyCode ?? '',
-        widget.interviewCode ?? '',
+  InterviewParticipantsParams get _params => (
+        interviewId: widget.interviewId,
+        vacancyCode: widget.vacancyCode ?? '',
+        interviewCode: widget.interviewCode ?? '',
+        page: _page,
+        searchQuery: _searchQuery,
       );
 
   @override
@@ -64,7 +78,8 @@ class _InterviewParticipantsScreenState
   }
 
   Future<void> _openEvaluationSheet(InterviewCandidateItem candidate) async {
-    final saved = await InterviewEvaluationSheet.show(context, candidate: candidate);
+    final saved =
+        await InterviewEvaluationSheet.show(context, candidate: candidate);
     if (saved == true && mounted) {
       ref.invalidate(interviewParticipantsProvider(_params));
     }
@@ -89,11 +104,16 @@ class _InterviewParticipantsScreenState
             child: HkSearchField(
               controller: _searchController,
               hintText: 'Cari nama atau kota kandidat...',
-              onSubmitted: (q) =>
-                  setState(() => _searchQuery = q.trim().toLowerCase()),
+              onSubmitted: (q) => setState(() {
+                _searchQuery = q.trim();
+                _page = 1;
+              }),
               onClear: () {
                 _searchController.clear();
-                setState(() => _searchQuery = '');
+                setState(() {
+                  _searchQuery = '';
+                  _page = 1;
+                });
               },
             ),
           ),
@@ -111,14 +131,8 @@ class _InterviewParticipantsScreenState
                       ref.invalidate(interviewParticipantsProvider(_params)),
                 );
               },
-              data: (items) {
-                final filtered = items.where((e) {
-                  if (_searchQuery.isEmpty) return true;
-                  return e.fullName.toLowerCase().contains(_searchQuery) ||
-                      e.city.toLowerCase().contains(_searchQuery);
-                }).toList();
-
-                if (filtered.isEmpty) {
+              data: (data) {
+                if (data.items.isEmpty) {
                   return RefreshIndicator(
                     onRefresh: () async {
                       ref.invalidate(interviewParticipantsProvider(_params));
@@ -135,30 +149,44 @@ class _InterviewParticipantsScreenState
                   );
                 }
 
-                return RefreshIndicator(
-                  onRefresh: () async {
-                    ref.invalidate(interviewParticipantsProvider(_params));
-                  },
-                  child: ListView.builder(
-                    padding: const EdgeInsets.all(16),
-                    itemCount: filtered.length,
-                    itemBuilder: (context, index) {
-                      final item = filtered[index];
-                      return Padding(
-                        padding: const EdgeInsets.only(bottom: 12),
-                        child: _ScheduleCandidateCard(
-                          item: item,
-                          onInspectProfile: () =>
-                              ApplicantProfileBottomSheet.show(
-                            context,
-                            applicantId: item.applicantId,
-                            initialName: item.fullName,
-                          ),
-                          onEvaluate: () => _openEvaluationSheet(item),
+                return Column(
+                  children: [
+                    Expanded(
+                      child: RefreshIndicator(
+                        onRefresh: () async {
+                          ref.invalidate(
+                              interviewParticipantsProvider(_params));
+                        },
+                        child: ListView.builder(
+                          padding: const EdgeInsets.all(16),
+                          itemCount: data.items.length,
+                          itemBuilder: (context, index) {
+                            final item = data.items[index];
+                            return Padding(
+                              padding: const EdgeInsets.only(bottom: 12),
+                              child: _ScheduleCandidateCard(
+                                item: item,
+                                onInspectProfile: () =>
+                                    ApplicantProfileBottomSheet.show(
+                                  context,
+                                  applicantId: item.applicantId,
+                                  initialName: item.fullName,
+                                ),
+                                onEvaluate: () => _openEvaluationSheet(item),
+                              ),
+                            );
+                          },
                         ),
-                      );
-                    },
-                  ),
+                      ),
+                    ),
+                    if (data.totalCount > 0)
+                      HkPaginationBar(
+                        currentPage: data.page,
+                        totalCount: data.totalCount,
+                        pageSize: data.pageSize,
+                        onPageChanged: (p) => setState(() => _page = p),
+                      ),
+                  ],
                 );
               },
             ),
@@ -223,7 +251,9 @@ class _ScheduleCandidateCard extends StatelessWidget {
             'Hadir: ${item.attendanceTime} • Penilai: ${item.interviewerName}',
             style: context.textStyles.bodySmall,
           ),
-          if (item.reason != '-' && item.reason != 'None' && item.reason.isNotEmpty) ...[
+          if (item.reason != '-' &&
+              item.reason != 'None' &&
+              item.reason.isNotEmpty) ...[
             const SizedBox(height: 6),
             Container(
               padding: const EdgeInsets.all(8),

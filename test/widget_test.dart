@@ -4,6 +4,7 @@ import 'package:hkjobs_mobile/core/widgets/hk_form_widgets.dart';
 import 'package:hkjobs_mobile/features/academy/domain/academy_models.dart';
 import 'package:hkjobs_mobile/features/interview/domain/interview_models.dart';
 import 'package:hkjobs_mobile/features/management/data/management_repository.dart';
+import 'package:hkjobs_mobile/features/recruitment/data/recruitment_repository.dart';
 import 'package:hkjobs_mobile/features/recruitment/domain/recruitment_models.dart';
 
 void main() {
@@ -219,5 +220,45 @@ void main() {
     expect(parsed.totalRecords, 1);
     expect(parsed.rows.length, 1);
     expect(parsed.rows.first['1'], 'PENEMPATAN_100');
+  });
+
+  test('PaginatedList correctly calculates totalPages and navigation state', () {
+    const list = PaginatedList<String>(
+      totalCount: 55,
+      items: ['a', 'b'],
+      page: 2,
+      pageSize: 20,
+    );
+    expect(list.totalPages, 3);
+    expect(list.hasPreviousPage, isTrue);
+    expect(list.hasNextPage, isTrue);
+
+    const firstPage = PaginatedList<String>(
+      totalCount: 55,
+      items: ['a', 'b'],
+      page: 1,
+      pageSize: 20,
+    );
+    expect(firstPage.hasPreviousPage, isFalse);
+    expect(firstPage.hasNextPage, isTrue);
+
+    const lastPage = PaginatedList<String>(
+      totalCount: 55,
+      items: ['a', 'b'],
+      page: 3,
+      pageSize: 20,
+    );
+    expect(lastPage.hasPreviousPage, isTrue);
+    expect(lastPage.hasNextPage, isFalse);
+
+    const emptyList = PaginatedList<String>(
+      totalCount: 0,
+      items: [],
+      page: 1,
+      pageSize: 20,
+    );
+    expect(emptyList.totalPages, 1);
+    expect(emptyList.hasPreviousPage, isFalse);
+    expect(emptyList.hasNextPage, isFalse);
   });
 }

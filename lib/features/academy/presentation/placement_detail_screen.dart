@@ -5,17 +5,30 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../core/constants/form_strings.dart';
 import '../../../core/errors/app_failure.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/widgets/hk_pagination_bar.dart';
 import '../../../core/widgets/hk_state_views.dart';
 import '../data/academy_repository.dart';
 import '../domain/academy_models.dart';
 
+typedef PlacementPersonnelParams = ({
+  String placementId,
+  int page,
+  String searchQuery,
+});
+
 final placementPersonnelProvider = FutureProvider.autoDispose
-    .family<List<PlacementPersonnelItem>, String>((ref, placementId) async {
+    .family<PaginatedList<PlacementPersonnelItem>, PlacementPersonnelParams>(
+        (ref, params) async {
   final repo = ref.watch(academyRepositoryProvider);
-  final res = await repo.fetchPlacementPersonnel(placementId);
+  final res = await repo.fetchPlacementPersonnel(
+    params.placementId,
+    page: params.page,
+    limit: 20,
+    searchQuery: params.searchQuery,
+  );
   switch (res) {
     case Success<PaginatedList<PlacementPersonnelItem>>(:final data):
-      return data.items;
+      return data;
     case Failure<PaginatedList<PlacementPersonnelItem>>(:final error):
       throw error;
   }
@@ -40,6 +53,13 @@ class _PlacementDetailScreenState
     extends ConsumerState<PlacementDetailScreen> {
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
+  int _page = 1;
+
+  PlacementPersonnelParams get _params => (
+        placementId: widget.placementId,
+        page: _page,
+        searchQuery: _searchQuery,
+      );
 
   @override
   void dispose() {
@@ -131,7 +151,7 @@ class _PlacementDetailScreenState
             content: Text('Personel berhasil di-bypass ke operasional.'),
           ),
         );
-        ref.invalidate(placementPersonnelProvider(widget.placementId));
+        ref.invalidate(placementPersonnelProvider(_params));
       case Failure<void>(:final error):
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -144,7 +164,7 @@ class _PlacementDetailScreenState
 
   @override
   Widget build(BuildContext context) {
-    final asyncData = ref.watch(placementPersonnelProvider(widget.placementId));
+    final asyncData = ref.watch(placementPersonnelProvider(_params));
     final title = widget.placementCode != null
         ? '${FormStrings.placementPersonnelTitle}: ${widget.placementCode}'
         : FormStrings.placementPersonnelTitle;
@@ -161,11 +181,16 @@ class _PlacementDetailScreenState
             child: HkSearchField(
               controller: _searchController,
               hintText: 'Cari nama personel...',
-              onSubmitted: (q) =>
-                  setState(() => _searchQuery = q.trim().toLowerCase()),
+              onSubmitted: (q) => setState(() {
+                _searchQuery = q.trim();
+                _page = 1;
+              }),
               onClear: () {
                 _searchController.clear();
-                setState(() => _searchQuery = '');
+                setState(() {
+                  _searchQuery = '';
+                  _page = 1;
+                });
               },
             ),
           ),
@@ -180,19 +205,14 @@ class _PlacementDetailScreenState
                 return HkErrorView(
                   message: msg,
                   onRetry: () =>
-                      ref.invalidate(placementPersonnelProvider(widget.placementId)),
+                      ref.invalidate(placementPersonnelProvider(_params)),
                 );
               },
-              data: (items) {
-                final filtered = items.where((e) {
-                  if (_searchQuery.isEmpty) return true;
-                  return e.candidateName.toLowerCase().contains(_searchQuery);
-                }).toList();
-
-                if (filtered.isEmpty) {
+              data: (data) {
+                if (data.items.isEmpty) {
                   return RefreshIndicator(
                     onRefresh: () async {
-                      ref.invalidate(placementPersonnelProvider(widget.placementId));
+                      ref.invalidate(placementPersonnelProvider(_params));
                     },
                     child: ListView(
                       children: const [
@@ -206,26 +226,39 @@ class _PlacementDetailScreenState
                   );
                 }
 
-                return RefreshIndicator(
-                  onRefresh: () async {
-                    ref.invalidate(placementPersonnelProvider(widget.placementId));
-                  },
-                  child: ListView.builder(
-                    padding: const EdgeInsets.all(16),
-                    itemCount: filtered.length,
-                    itemBuilder: (context, index) {
-                      final item = filtered[index];
-                      return Padding(
-                        padding: const EdgeInsets.only(bottom: 12),
-                        child: _PlacementPersonnelCard(
-                          item: item,
-                          onBypass: () => _bypassToOps(item),
-                          onOpenUrl: (url, label) =>
-                              _openExternalUrl(url, label: label),
+                return Column(
+                  children: [
+                    Expanded(
+                      child: RefreshIndicator(
+                        onRefresh: () async {
+                          ref.invalidate(placementPersonnelProvider(_params));
+                        },
+                        child: ListView.builder(
+                          padding: const EdgeInsets.all(16),
+                          itemCount: data.items.length,
+                          itemBuilder: (context, index) {
+                            final item = data.items[index];
+                            return Padding(
+                              padding: const EdgeInsets.only(bottom: 12),
+                              child: _PlacementPersonnelCard(
+                                item: item,
+                                onBypass: () => _bypassToOps(item),
+                                onOpenUrl: (url, label) =>
+                                    _openExternalUrl(url, label: label),
+                              ),
+                            );
+                          },
                         ),
-                      );
-                    },
-                  ),
+                      ),
+                    ),
+                    if (data.totalCount > 0)
+                      HkPaginationBar(
+                        currentPage: data.page,
+                        totalCount: data.totalCount,
+                        pageSize: data.pageSize,
+                        onPageChanged: (p) => setState(() => _page = p),
+                      ),
+                  ],
                 );
               },
             ),

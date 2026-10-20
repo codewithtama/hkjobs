@@ -23,14 +23,17 @@ class InterviewRepository {
   Future<Result<PaginatedList<InterviewScheduleItem>>> fetchSchedules({
     required AdminSession? session,
     String searchQuery = '',
-    int limit = 40,
+    int page = 1,
+    int limit = 20,
   }) async {
     final endpoint = session?.role == AdminRole.interviewer
         ? ApiEndpoints.interviewerScheduleTable(session!.adminId)
         : ApiEndpoints.interviewListTable;
 
+    final start = (page - 1) * limit;
     final res = await _apiClient.fetchDataTable(
       endpoint: endpoint,
+      start: start,
       length: limit,
       searchQuery: searchQuery,
     );
@@ -44,6 +47,8 @@ class InterviewRepository {
           PaginatedList<InterviewScheduleItem>(
             totalCount: data.totalRecords,
             items: items,
+            page: page,
+            pageSize: limit,
           ),
         );
     }
@@ -54,10 +59,13 @@ class InterviewRepository {
     String searchQuery = '',
     String vacancyCode = '',
     String interviewCode = '',
-    int limit = 50,
+    int page = 1,
+    int limit = 20,
   }) async {
+    final start = (page - 1) * limit;
     final res = await _apiClient.fetchDataTable(
       endpoint: ApiEndpoints.interviewParticipantsTable(interviewId),
+      start: start,
       length: limit,
       searchQuery: searchQuery,
     );
@@ -79,6 +87,8 @@ class InterviewRepository {
           PaginatedList<InterviewCandidateItem>(
             totalCount: data.totalRecords,
             items: items,
+            page: page,
+            pageSize: limit,
           ),
         );
     }
@@ -87,7 +97,8 @@ class InterviewRepository {
   Future<Result<PaginatedList<InterviewCandidateItem>>> fetchCandidatesByTab({
     required InterviewSubTab tab,
     String searchQuery = '',
-    int limit = 40,
+    int page = 1,
+    int limit = 20,
   }) async {
     final endpoint = switch (tab) {
       InterviewSubTab.confirmed => ApiEndpoints.interviewConfirmedTable,
@@ -97,8 +108,10 @@ class InterviewRepository {
       InterviewSubTab.schedules => ApiEndpoints.interviewConfirmedTable,
     };
 
+    final start = (page - 1) * limit;
     final res = await _apiClient.fetchDataTable(
       endpoint: endpoint,
+      start: start,
       length: limit,
       searchQuery: searchQuery,
     );
@@ -112,6 +125,8 @@ class InterviewRepository {
           PaginatedList<InterviewCandidateItem>(
             totalCount: data.totalRecords,
             items: items,
+            page: page,
+            pageSize: limit,
           ),
         );
     }

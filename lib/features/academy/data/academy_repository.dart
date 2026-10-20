@@ -22,10 +22,13 @@ class AcademyRepository {
 
   Future<Result<PaginatedList<PlacementWaitingItem>>> fetchPlacementWaiting({
     String searchQuery = '',
-    int limit = 40,
+    int page = 1,
+    int limit = 20,
   }) async {
+    final start = (page - 1) * limit;
     final res = await _apiClient.fetchDataTable(
       endpoint: ApiEndpoints.placementWaitingTable,
+      start: start,
       length: limit,
       searchQuery: searchQuery,
     );
@@ -38,6 +41,8 @@ class AcademyRepository {
             totalCount: data.totalRecords,
             items:
                 data.rows.map(PlacementWaitingItem.fromDataTableRow).toList(),
+            page: page,
+            pageSize: limit,
           ),
         );
     }
@@ -45,10 +50,13 @@ class AcademyRepository {
 
   Future<Result<PaginatedList<PlacementScheduleItem>>> fetchPlacementSchedules({
     String searchQuery = '',
-    int limit = 40,
+    int page = 1,
+    int limit = 20,
   }) async {
+    final start = (page - 1) * limit;
     final res = await _apiClient.fetchDataTable(
       endpoint: ApiEndpoints.placementScheduleTable,
+      start: start,
       length: limit,
       searchQuery: searchQuery,
     );
@@ -61,6 +69,8 @@ class AcademyRepository {
             totalCount: data.totalRecords,
             items:
                 data.rows.map(PlacementScheduleItem.fromDataTableRow).toList(),
+            page: page,
+            pageSize: limit,
           ),
         );
     }
@@ -68,10 +78,13 @@ class AcademyRepository {
 
   Future<Result<PaginatedList<AcademyAccountItem>>> fetchAcademyAccounts({
     String searchQuery = '',
-    int limit = 40,
+    int page = 1,
+    int limit = 20,
   }) async {
+    final start = (page - 1) * limit;
     final res = await _apiClient.fetchDataTable(
       endpoint: ApiEndpoints.academyAccountsTable,
+      start: start,
       length: limit,
       searchQuery: searchQuery,
     );
@@ -83,6 +96,8 @@ class AcademyRepository {
           PaginatedList<AcademyAccountItem>(
             totalCount: data.totalRecords,
             items: data.rows.map(AcademyAccountItem.fromDataTableRow).toList(),
+            page: page,
+            pageSize: limit,
           ),
         );
     }
@@ -90,10 +105,13 @@ class AcademyRepository {
 
   Future<Result<PaginatedList<PsikotesQuestionItem>>> fetchPsikotesQuestions({
     String searchQuery = '',
-    int limit = 40,
+    int page = 1,
+    int limit = 20,
   }) async {
+    final start = (page - 1) * limit;
     final res = await _apiClient.fetchDataTable(
       endpoint: ApiEndpoints.psikotesTable,
+      start: start,
       length: limit,
       searchQuery: searchQuery,
     );
@@ -106,6 +124,8 @@ class AcademyRepository {
             totalCount: data.totalRecords,
             items:
                 data.rows.map(PsikotesQuestionItem.fromDataTableRow).toList(),
+            page: page,
+            pageSize: limit,
           ),
         );
     }
@@ -113,15 +133,19 @@ class AcademyRepository {
 
   Future<Result<PaginatedList<TrainingOfflineRecord>>> fetchTrainingRecords({
     String searchQuery = '',
-    int limit = 40,
+    int page = 1,
+    int limit = 20,
   }) async {
+    final start = (page - 1) * limit;
     final passedRes = await _apiClient.fetchDataTable(
       endpoint: ApiEndpoints.trainingOfflinePassedTable,
+      start: start,
       length: limit,
       searchQuery: searchQuery,
     );
     final failedRes = await _apiClient.fetchDataTable(
       endpoint: ApiEndpoints.trainingOfflineFailedTable,
+      start: start,
       length: limit,
       searchQuery: searchQuery,
     );
@@ -146,16 +170,21 @@ class AcademyRepository {
       PaginatedList<TrainingOfflineRecord>(
         totalCount: total,
         items: combined,
+        page: page,
+        pageSize: limit,
       ),
     );
   }
 
   Future<Result<PaginatedList<FieldManagerItem>>> fetchFieldManagers({
     String searchQuery = '',
-    int limit = 40,
+    int page = 1,
+    int limit = 20,
   }) async {
+    final start = (page - 1) * limit;
     final res = await _apiClient.fetchDataTable(
       endpoint: ApiEndpoints.fieldManagerTable,
+      start: start,
       length: limit,
       searchQuery: searchQuery,
     );
@@ -167,6 +196,8 @@ class AcademyRepository {
           PaginatedList<FieldManagerItem>(
             totalCount: data.totalRecords,
             items: data.rows.map(FieldManagerItem.fromDataTableRow).toList(),
+            page: page,
+            pageSize: limit,
           ),
         );
     }
@@ -274,10 +305,13 @@ class AcademyRepository {
   Future<Result<PaginatedList<PlacementPersonnelItem>>> fetchPlacementPersonnel(
     String placementId, {
     String searchQuery = '',
-    int limit = 50,
+    int page = 1,
+    int limit = 20,
   }) async {
+    final start = (page - 1) * limit;
     final res = await _apiClient.fetchDataTable(
       endpoint: ApiEndpoints.placementPersonnelTable(placementId),
+      start: start,
       length: limit,
       searchQuery: searchQuery,
     );
@@ -291,6 +325,8 @@ class AcademyRepository {
           PaginatedList<PlacementPersonnelItem>(
             totalCount: data.totalRecords,
             items: items,
+            page: page,
+            pageSize: limit,
           ),
         );
     }

@@ -14,10 +14,21 @@ class PaginatedList<T> {
   const PaginatedList({
     required this.totalCount,
     required this.items,
+    this.page = 1,
+    this.pageSize = 20,
   });
 
   final int totalCount;
   final List<T> items;
+  final int page;
+  final int pageSize;
+
+  int get totalPages => (totalCount <= 0 || pageSize <= 0)
+      ? 1
+      : ((totalCount + pageSize - 1) ~/ pageSize);
+
+  bool get hasPreviousPage => page > 1;
+  bool get hasNextPage => page < totalPages;
 }
 
 class RecruitmentRepository {
@@ -28,10 +39,13 @@ class RecruitmentRepository {
 
   Future<Result<PaginatedList<JobVacancyItem>>> fetchVacancies({
     String searchQuery = '',
-    int limit = 40,
+    int page = 1,
+    int limit = 20,
   }) async {
+    final start = (page - 1) * limit;
     final res = await _apiClient.fetchDataTable(
       endpoint: ApiEndpoints.advertisementListTable,
+      start: start,
       length: limit,
       searchQuery: searchQuery,
     );
@@ -44,6 +58,8 @@ class RecruitmentRepository {
           PaginatedList<JobVacancyItem>(
             totalCount: data.totalRecords,
             items: items,
+            page: page,
+            pageSize: limit,
           ),
         );
     }
@@ -52,10 +68,13 @@ class RecruitmentRepository {
   Future<Result<PaginatedList<VacancyApplicationItem>>> fetchVacancyApplicants(
     String advertId, {
     String searchQuery = '',
-    int limit = 50,
+    int page = 1,
+    int limit = 20,
   }) async {
+    final start = (page - 1) * limit;
     final res = await _apiClient.fetchDataTable(
       endpoint: ApiEndpoints.advertisementApplicantsTable(advertId),
+      start: start,
       length: limit,
       searchQuery: searchQuery,
     );
@@ -70,6 +89,8 @@ class RecruitmentRepository {
           PaginatedList<VacancyApplicationItem>(
             totalCount: data.totalRecords,
             items: items,
+            page: page,
+            pageSize: limit,
           ),
         );
     }
@@ -78,7 +99,8 @@ class RecruitmentRepository {
   Future<Result<PaginatedList<VacancyApplicationItem>>> fetchApplicationsByTab({
     required RecruitmentSubTab tab,
     String searchQuery = '',
-    int limit = 40,
+    int page = 1,
+    int limit = 20,
   }) async {
     final (String endpoint, String defaultStatus) = switch (tab) {
       RecruitmentSubTab.approved => (
@@ -95,8 +117,10 @@ class RecruitmentRepository {
         ),
     };
 
+    final start = (page - 1) * limit;
     final res = await _apiClient.fetchDataTable(
       endpoint: endpoint,
+      start: start,
       length: limit,
       searchQuery: searchQuery,
     );
@@ -116,6 +140,8 @@ class RecruitmentRepository {
           PaginatedList<VacancyApplicationItem>(
             totalCount: data.totalRecords,
             items: items,
+            page: page,
+            pageSize: limit,
           ),
         );
     }
@@ -124,13 +150,16 @@ class RecruitmentRepository {
   Future<Result<PaginatedList<MasterApplicantItem>>> fetchMasterApplicants({
     required bool isExisting,
     String searchQuery = '',
-    int limit = 40,
+    int page = 1,
+    int limit = 20,
   }) async {
     final endpoint = isExisting
         ? ApiEndpoints.applicantExistingTable
         : ApiEndpoints.applicantNewComerTable;
+    final start = (page - 1) * limit;
     final res = await _apiClient.fetchDataTable(
       endpoint: endpoint,
+      start: start,
       length: limit,
       searchQuery: searchQuery,
     );
@@ -150,6 +179,8 @@ class RecruitmentRepository {
           PaginatedList<MasterApplicantItem>(
             totalCount: data.totalRecords,
             items: items,
+            page: page,
+            pageSize: limit,
           ),
         );
     }

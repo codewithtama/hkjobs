@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/constants/app_strings.dart';
 import '../../../core/errors/app_failure.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/widgets/hk_pagination_bar.dart';
 import '../../../core/widgets/hk_state_views.dart';
 import '../domain/academy_models.dart';
 import 'academy_controller.dart';
@@ -209,18 +210,31 @@ class _AcademyScreenState extends ConsumerState<AcademyScreen> {
             ),
             data: (viewState) {
               final rows = _rows(viewState, controller);
-              return RefreshIndicator(
-                onRefresh: controller.refresh,
-                child: rows.isEmpty
-                    ? ListView(children: const [HkEmptyView()])
-                    : ListView.builder(
-                        padding: const EdgeInsets.all(16),
-                        itemCount: rows.length,
-                        itemBuilder: (context, i) => Padding(
-                          padding: const EdgeInsets.only(bottom: 12),
-                          child: _RowCard(data: rows[i]),
-                        ),
-                      ),
+              return Column(
+                children: [
+                  Expanded(
+                    child: RefreshIndicator(
+                      onRefresh: controller.refresh,
+                      child: rows.isEmpty
+                          ? ListView(children: const [HkEmptyView()])
+                          : ListView.builder(
+                              padding: const EdgeInsets.all(16),
+                              itemCount: rows.length,
+                              itemBuilder: (context, i) => Padding(
+                                padding: const EdgeInsets.only(bottom: 12),
+                                child: _RowCard(data: rows[i]),
+                              ),
+                            ),
+                    ),
+                  ),
+                  if (viewState.totalCount > 0)
+                    HkPaginationBar(
+                      currentPage: viewState.page,
+                      totalCount: viewState.totalCount,
+                      pageSize: viewState.pageSize,
+                      onPageChanged: controller.goToPage,
+                    ),
+                ],
               );
             },
           ),
