@@ -40,8 +40,46 @@ jobs:
       - name: Run Tests
         run: flutter test
 
+      - name: Configure Android Release Keystore
+        run: |
+          if [ -n "${{ secrets.KEYSTORE_BASE64 }}" ]; then
+            echo "Using repository secret KEYSTORE_BASE64..."
+            echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > android/app/hkjobs-release.jks
+            echo "storePassword=${{ secrets.KEYSTORE_PASSWORD }}" > android/key.properties
+            echo "keyPassword=${{ secrets.KEY_PASSWORD }}" >> android/key.properties
+            echo "keyAlias=${{ secrets.KEY_ALIAS }}" >> android/key.properties
+            echo "storeFile=hkjobs-release.jks" >> android/key.properties
+          else
+            echo "Generating consistent production keystore certificate..."
+            keytool -genkeypair -v -keystore android/app/hkjobs-release.jks \
+              -alias hkjobs -keyalg RSA -keysize 2048 -validity 10000 \
+              -storepass hkjobs2026carefast -keypass hkjobs2026carefast \
+              -dname "CN=Hygiene Kleen, OU=IT Ops, O=PT Peduli Cepat Internasional, L=Jakarta, ST=DKI Jakarta, C=ID"
+            echo "storePassword=hkjobs2026carefast" > android/key.properties
+            echo "keyPassword=hkjobs2026carefast" >> android/key.properties
+            echo "keyAlias=hkjobs" >> android/key.properties
+            echo "storeFile=hkjobs-release.jks" >> android/key.properties
+          fi
+
+      - name: Extract Release Tag and Calculate Version Code
+        id: versioning
+        run: |
+          REF_TAG="${GITHUB_REF#refs/tags/}"
+          VERSION_NAME="${REF_TAG#v}"
+          if [ -z "$VERSION_NAME" ] || [ "$REF_TAG" = "refs/heads/main" ]; then
+            VERSION_NAME="1.0.0"
+          fi
+          # Ensure build number strictly increments on each run
+          BUILD_NUMBER="${{ github.run_number }}"
+          echo "version_name=$VERSION_NAME" >> $GITHUB_OUTPUT
+          echo "build_number=$BUILD_NUMBER" >> $GITHUB_OUTPUT
+          echo "Building APK for Version: $VERSION_NAME (versionCode: $BUILD_NUMBER)"
+
       - name: Build Release APK
-        run: flutter build apk --release
+        run: |
+          flutter build apk --release \
+            --build-name="${{ steps.versioning.outputs.version_name }}" \
+            --build-number="${{ steps.versioning.outputs.build_number }}"
 
       - name: Prepare APK Asset
         run: |
@@ -52,6 +90,7 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: dist/hkjobs-release.apk
+          name: "Rilis v${{ steps.versioning.outputs.version_name }} (Build ${{ steps.versioning.outputs.build_number }})"
           generate_release_notes: true
           draft: false
           prerelease: false
