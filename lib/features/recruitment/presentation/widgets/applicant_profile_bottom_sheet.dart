@@ -4,7 +4,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/constants/app_strings.dart';
 import '../../../../core/errors/app_failure.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/utils/whatsapp_launcher.dart';
 import '../../../../core/widgets/hk_state_views.dart';
+import '../../../../core/widgets/hk_whatsapp_button.dart';
 import '../../data/recruitment_repository.dart';
 import '../../domain/recruitment_models.dart';
 
@@ -92,6 +94,15 @@ class ApplicantProfileBottomSheet extends ConsumerWidget {
                       'NIK: ${data.nik} • ID #${data.id}',
                       style: context.monoStyle.copyWith(color: colors.accent),
                     ),
+                    if (WhatsAppLauncher.isValidPhone(data.phone)) ...[
+                      const SizedBox(height: 12),
+                      HkWhatsAppButton(
+                        phone: data.phone,
+                        candidateName: data.fullName,
+                        contextDescription: 'lamaran posisi ${data.positionName}',
+                        label: 'Chat WhatsApp Pelamar',
+                      ),
+                    ],
                     const SizedBox(height: 16),
                     _ProfileInfoGrid(profile: data),
                     const SizedBox(height: 20),
@@ -173,9 +184,25 @@ class _ProfileInfoGrid extends StatelessWidget {
                       ),
                     ),
                     Expanded(
-                      child: Text(
-                        pair.$2,
-                        style: context.textStyles.bodyMedium,
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              pair.$2,
+                              style: context.textStyles.bodyMedium,
+                            ),
+                          ),
+                          if (pair.$1 == 'No. Telepon' &&
+                              WhatsAppLauncher.isValidPhone(pair.$2)) ...[
+                            const SizedBox(width: 8),
+                            HkWhatsAppIconButton(
+                              phone: pair.$2,
+                              candidateName: profile.fullName,
+                              contextDescription:
+                                  'lamaran posisi ${profile.positionName}',
+                            ),
+                          ],
+                        ],
                       ),
                     ),
                   ],

@@ -8,6 +8,7 @@ import '../../../core/errors/app_failure.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/hk_pagination_bar.dart';
 import '../../../core/widgets/hk_state_views.dart';
+import '../../../core/widgets/hk_whatsapp_button.dart';
 import '../data/recruitment_repository.dart';
 import '../domain/recruitment_models.dart';
 import 'widgets/applicant_profile_bottom_sheet.dart';
@@ -307,6 +308,11 @@ class _VacancyApplicantCard extends StatelessWidget {
                 onPressed: onInspectProfile,
                 icon: const Icon(Icons.assignment_ind_outlined, size: 18),
                 label: const Text(AppStrings.detailApplicantButton),
+              ),
+              HkWhatsAppButton(
+                phone: item.phone,
+                candidateName: item.fullName,
+                contextDescription: 'lamaran pekerjaan di lowongan ${item.lastPosition}',
               ),
               if (isPendingReview)
                 FilledButton.icon(

@@ -7,6 +7,7 @@ import '../../../core/errors/app_failure.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/hk_pagination_bar.dart';
 import '../../../core/widgets/hk_state_views.dart';
+import '../../../core/widgets/hk_whatsapp_button.dart';
 import '../domain/interview_models.dart';
 import 'interview_controller.dart';
 import 'widgets/interview_evaluation_sheet.dart';
@@ -338,13 +339,22 @@ class _CandidateCard extends StatelessWidget {
             ),
           ],
           const SizedBox(height: 12),
-          Align(
-            alignment: Alignment.centerRight,
-            child: FilledButton.icon(
-              onPressed: onEvaluate,
-              icon: const Icon(Icons.rate_review_outlined, size: 18),
-              label: const Text('Nilai interview'),
-            ),
+          Wrap(
+            spacing: 10,
+            runSpacing: 8,
+            alignment: WrapAlignment.end,
+            children: [
+              HkWhatsAppButton(
+                phone: item.phone,
+                candidateName: item.fullName,
+                contextDescription: 'jadwal interview ${item.interviewCode}',
+              ),
+              FilledButton.icon(
+                onPressed: onEvaluate,
+                icon: const Icon(Icons.rate_review_outlined, size: 18),
+                label: const Text('Nilai interview'),
+              ),
+            ],
           ),
         ],
       ),

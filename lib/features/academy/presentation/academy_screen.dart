@@ -7,6 +7,7 @@ import '../../../core/errors/app_failure.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/hk_pagination_bar.dart';
 import '../../../core/widgets/hk_state_views.dart';
+import '../../../core/widgets/hk_whatsapp_button.dart';
 import '../domain/academy_models.dart';
 import 'academy_controller.dart';
 import 'widgets/assign_placement_dialog.dart';
@@ -18,6 +19,7 @@ class _RowData {
     required this.meta,
     this.badge,
     this.onTap,
+    this.phone,
   });
 
   final String title;
@@ -25,6 +27,7 @@ class _RowData {
   final String meta;
   final String? badge;
   final VoidCallback? onTap;
+  final String? phone;
 }
 
 class AcademyScreen extends ConsumerStatefulWidget {
@@ -53,6 +56,7 @@ class _AcademyScreenState extends ConsumerState<AcademyScreen> {
                   meta:
                       '${e.phone} • ${e.email}\nSkor PKL: ${e.pklScore} • Lolos PKL: ${e.passedDate}',
                   badge: 'Lolos PKL',
+                  phone: e.phone,
                   onTap: () async {
                     final assigned = await AssignPlacementDialog.show(
                       context,
@@ -117,6 +121,7 @@ class _AcademyScreenState extends ConsumerState<AcademyScreen> {
                   subtitle: '${e.nuc} • ${e.email}',
                   meta: 'HP: ${e.phone} • Dibuat: ${e.createdAt}',
                   badge: e.status,
+                  phone: e.phone,
                 ))
             .toList();
     }
@@ -287,6 +292,15 @@ class _RowCard extends StatelessWidget {
               style: context.monoStyle.copyWith(color: colors.accent)),
           const SizedBox(height: 6),
           Text(data.meta, style: context.textStyles.bodySmall),
+          if (data.phone != null) ...[
+            const SizedBox(height: 10),
+            HkWhatsAppButton(
+              phone: data.phone!,
+              candidateName: data.title,
+              contextDescription: 'operasional HK Academy',
+              compact: true,
+            ),
+          ],
         ],
       ),
     ),

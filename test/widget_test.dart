@@ -4,6 +4,7 @@ import 'package:hkjobs_mobile/core/widgets/hk_form_widgets.dart';
 import 'package:hkjobs_mobile/features/academy/domain/academy_models.dart';
 import 'package:hkjobs_mobile/features/interview/domain/interview_models.dart';
 import 'package:hkjobs_mobile/features/management/data/management_repository.dart';
+import 'package:hkjobs_mobile/core/utils/whatsapp_launcher.dart';
 import 'package:hkjobs_mobile/features/recruitment/data/recruitment_repository.dart';
 import 'package:hkjobs_mobile/features/recruitment/domain/recruitment_models.dart';
 
@@ -260,5 +261,36 @@ void main() {
     expect(emptyList.totalPages, 1);
     expect(emptyList.hasPreviousPage, isFalse);
     expect(emptyList.hasNextPage, isFalse);
+  });
+
+  test('WhatsAppLauncher normalizes Indonesian phone numbers cleanly', () {
+    // Starting with 0
+    expect(WhatsAppLauncher.normalizeIndonesianPhone('089503091346'), '6289503091346');
+    // Starting with 8 (from screenshot: 83120980567, 83827646183)
+    expect(WhatsAppLauncher.normalizeIndonesianPhone('83120980567'), '6283120980567');
+    expect(WhatsAppLauncher.normalizeIndonesianPhone('83827646183'), '6283827646183');
+    // Starting with +62 or 62
+    expect(WhatsAppLauncher.normalizeIndonesianPhone('+628123456789'), '628123456789');
+    expect(WhatsAppLauncher.normalizeIndonesianPhone('628123456789'), '628123456789');
+    // With spaces, dashes, or formatting
+    expect(WhatsAppLauncher.normalizeIndonesianPhone('0812-3456-7890'), '6281234567890');
+    expect(WhatsAppLauncher.normalizeIndonesianPhone('+62 812 3456 7890'), '6281234567890');
+    // Invalid numbers
+    expect(WhatsAppLauncher.normalizeIndonesianPhone(''), isNull);
+    expect(WhatsAppLauncher.normalizeIndonesianPhone('123'), isNull);
+    expect(WhatsAppLauncher.normalizeIndonesianPhone('tidak ada'), isNull);
+    expect(WhatsAppLauncher.normalizeIndonesianPhone(null), isNull);
+  });
+
+  test('WhatsAppLauncher builds wa.me URI with optional message', () {
+    final uri = WhatsAppLauncher.buildWhatsAppUri(
+      phone: '089503091346',
+      message: 'Halo ADE SUPENDI',
+    );
+    expect(uri, isNotNull);
+    expect(uri!.scheme, 'https');
+    expect(uri.host, 'wa.me');
+    expect(uri.path, '/6289503091346');
+    expect(uri.queryParameters['text'], 'Halo ADE SUPENDI');
   });
 }
