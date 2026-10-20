@@ -2,7 +2,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/errors/app_failure.dart';
-import '../../recruitment/data/recruitment_repository.dart';
 import '../data/academy_repository.dart';
 import '../domain/academy_models.dart';
 

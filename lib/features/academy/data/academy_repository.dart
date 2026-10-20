@@ -8,6 +8,8 @@ import '../../../core/utils/html_cell_parser.dart';
 import '../../recruitment/data/recruitment_repository.dart';
 import '../domain/academy_models.dart';
 
+export '../../recruitment/data/recruitment_repository.dart' show PaginatedList;
+
 final academyRepositoryProvider = Provider<AcademyRepository>((ref) {
   return AcademyRepository(apiClient: ref.watch(hkJobsApiClientProvider));
 });
@@ -259,6 +261,107 @@ class AcademyRepository {
         'id_training_list_tidaklolos': trainingListId,
         'id_user_tidaklolos': userId,
         'alasanTidaklolos': reason.trim(),
+      }),
+    );
+    switch (res) {
+      case Failure<Object?>(:final error):
+        return Failure<void>(error);
+      case Success<Object?>():
+        return const Success<void>(null);
+    }
+  }
+
+  Future<Result<PaginatedList<PlacementPersonnelItem>>> fetchPlacementPersonnel(
+    String placementId, {
+    String searchQuery = '',
+    int limit = 50,
+  }) async {
+    final res = await _apiClient.fetchDataTable(
+      endpoint: ApiEndpoints.placementPersonnelTable(placementId),
+      length: limit,
+      searchQuery: searchQuery,
+    );
+    switch (res) {
+      case Failure<ParsedDataTableResult>(:final error):
+        return Failure<PaginatedList<PlacementPersonnelItem>>(error);
+      case Success<ParsedDataTableResult>(:final data):
+        final items =
+            data.rows.map(PlacementPersonnelItem.fromDataTableRow).toList();
+        return Success<PaginatedList<PlacementPersonnelItem>>(
+          PaginatedList<PlacementPersonnelItem>(
+            totalCount: data.totalRecords,
+            items: items,
+          ),
+        );
+    }
+  }
+
+  Future<Result<void>> bypassPlacementToOps({
+    required String waitingListPlacementId,
+  }) async {
+    final res = await _apiClient.postFormJson(
+      ApiEndpoints.placementBypassToOps,
+      () => FormData.fromMap(<String, Object>{
+        'id_waiting_listPenempatan': waitingListPlacementId,
+      }),
+    );
+    switch (res) {
+      case Failure<Object?>(:final error):
+        return Failure<void>(error);
+      case Success<Object?>():
+        return const Success<void>(null);
+    }
+  }
+
+  Future<Result<void>> assignCandidateToPlacement({
+    required String waitingListPlacementId,
+    required String placementScheduleId,
+  }) async {
+    final res = await _apiClient.postFormJson(
+      ApiEndpoints.placementAssignCandidate,
+      () => FormData.fromMap(<String, Object>{
+        'id_waiting_listPenempatan': waitingListPlacementId,
+        'id_penempatanSchedule': placementScheduleId,
+        'id_waiting_list_penempatan': waitingListPlacementId,
+        'id_penempatan_schedule': placementScheduleId,
+      }),
+    );
+    switch (res) {
+      case Failure<Object?>(:final error):
+        return Failure<void>(error);
+      case Success<Object?>():
+        return const Success<void>(null);
+    }
+  }
+
+  Future<Result<void>> resetOnlineTraining({
+    required String userId,
+    required String reason,
+  }) async {
+    final res = await _apiClient.postFormJson(
+      ApiEndpoints.trainingOnlineReset,
+      () => FormData.fromMap(<String, Object>{
+        'id_user': userId,
+        'alasan': reason.trim(),
+      }),
+    );
+    switch (res) {
+      case Failure<Object?>(:final error):
+        return Failure<void>(error);
+      case Success<Object?>():
+        return const Success<void>(null);
+    }
+  }
+
+  Future<Result<void>> bypassOnlineTraining({
+    required String userId,
+    required String reason,
+  }) async {
+    final res = await _apiClient.postFormJson(
+      ApiEndpoints.trainingOnlineBypass,
+      () => FormData.fromMap(<String, Object>{
+        'id_user': userId,
+        'alasan': reason.trim(),
       }),
     );
     switch (res) {

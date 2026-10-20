@@ -81,6 +81,45 @@ class PlacementScheduleItem {
 }
 
 @immutable
+class PlacementPersonnelItem {
+  const PlacementPersonnelItem({
+    required this.id,
+    required this.candidateName,
+    required this.positionName,
+    required this.projectName,
+    required this.suratTugasDownloadUrl,
+    required this.suratTugasPdfUrl,
+    required this.status,
+    required this.reason,
+  });
+
+  final String id;
+  final String candidateName;
+  final String positionName;
+  final String projectName;
+  final String suratTugasDownloadUrl;
+  final String suratTugasPdfUrl;
+  final String status;
+  final String reason;
+
+  factory PlacementPersonnelItem.fromDataTableRow(Map<String, Object?> row) {
+    final downloadHrefs = HtmlCellParser.extractHrefs(row['5']);
+    final pdfHrefs = HtmlCellParser.extractHrefs(row['7']);
+
+    return PlacementPersonnelItem(
+      id: (row['DT_RowId'] ?? '').toString(),
+      candidateName: HtmlCellParser.stripHtml(row['1']),
+      positionName: HtmlCellParser.stripHtml(row['2']),
+      projectName: HtmlCellParser.stripHtml(row['4']),
+      suratTugasDownloadUrl: downloadHrefs.isNotEmpty ? downloadHrefs.first : '',
+      suratTugasPdfUrl: pdfHrefs.isNotEmpty ? pdfHrefs.first : '',
+      status: HtmlCellParser.stripHtml(row['8']),
+      reason: HtmlCellParser.stripHtml(row['9']),
+    );
+  }
+}
+
+@immutable
 class AcademyAccountItem {
   const AcademyAccountItem({
     required this.id,

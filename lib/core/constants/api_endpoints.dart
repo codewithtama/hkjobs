@@ -70,6 +70,8 @@ abstract final class ApiEndpoints {
       'training/editStatusPelamar/$trainingListId';
   static const String trainingUpdatePassed = 'training/updateLolosTraining';
   static const String trainingUpdateFailed = 'training/updateTidakLolosTraining';
+  static const String trainingOnlineReset = 'training/updateAlasan';
+  static const String trainingOnlineBypass = 'training/updateAlasanOnlineLolos';
 
   static const String pklWaitingTable = 'pakelarin/listTable';
   static const String pklScheduleTable = 'pakelarin/listTable2';
@@ -77,6 +79,17 @@ abstract final class ApiEndpoints {
   static const String pklMentorTable = 'pakelarin/listTable6';
   static const String placementWaitingTable = 'pakelarin/listTable7';
   static const String placementScheduleTable = 'pakelarin/listTable13';
+  static String placementPersonnelTable(String placementId) =>
+      'pakelarin/listTable14/$placementId';
+  static const String placementScheduleCreate =
+      'pakelarin/createSchedulePenempatan';
+  static const String placementScheduleForm =
+      'pakelarin/createpenempatanschedule';
+  static const String placementAssignCandidate = 'pakelarin/updatePenempatan';
+  static const String placementBypassToOps =
+      'pakelarin/updateByPasstoOpsBySigit';
+  static String placementDetailJson(String id) =>
+      'pakelarin/editPenempatanSchedule/$id';
   static const String fieldManagerTable = 'pakelarin/listTable19';
   static const String psikotesTable = 'psikotes/listTable';
 

@@ -8,6 +8,7 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/hk_state_views.dart';
 import '../domain/academy_models.dart';
 import 'academy_controller.dart';
+import 'widgets/assign_placement_dialog.dart';
 
 class _RowData {
   const _RowData({
@@ -41,14 +42,32 @@ class _AcademyScreenState extends ConsumerState<AcademyScreen> {
     super.dispose();
   }
 
-  List<_RowData> _rows(AcademyViewState s) {
+  List<_RowData> _rows(AcademyViewState s, AcademyController controller) {
     switch (s.activeTab) {
       case AcademySubTab.placementWaiting:
         return s.waitingPlacements
             .map((e) => _RowData(
                   title: e.applicantName,
                   subtitle: '${e.positionName} • ${e.city}',
-                  meta: '${e.phone} • ${e.email}\nSkor PKL: ${e.pklScore} • Lolos PKL: ${e.passedDate}',
+                  meta:
+                      '${e.phone} • ${e.email}\nSkor PKL: ${e.pklScore} • Lolos PKL: ${e.passedDate}',
+                  badge: 'Lolos PKL',
+                  onTap: () async {
+                    final assigned = await AssignPlacementDialog.show(
+                      context,
+                      candidate: e,
+                    );
+                    if (assigned == true && mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text(
+                            'Kandidat berhasil ditugaskan ke jadwal penempatan.',
+                          ),
+                        ),
+                      );
+                      await controller.refresh();
+                    }
+                  },
                 ))
             .toList();
       case AcademySubTab.placementSchedules:
@@ -57,6 +76,9 @@ class _AcademyScreenState extends ConsumerState<AcademyScreen> {
                   title: e.code,
                   subtitle: '${e.projectName} • ${e.positionName}',
                   meta: 'Kuota: ${e.quota} • Tanggal: ${e.date}',
+                  onTap: () => context.push(
+                    '/academy/placement-detail/${e.id}?code=${e.code}',
+                  ),
                 ))
             .toList();
       case AcademySubTab.academyNus:
@@ -106,20 +128,38 @@ class _AcademyScreenState extends ConsumerState<AcademyScreen> {
         asyncState.valueOrNull?.activeTab ?? AcademySubTab.placementWaiting;
     final controller = ref.read(academyControllerProvider.notifier);
 
+    Widget? buildFab() {
+      if (activeTab == AcademySubTab.placementSchedules) {
+        return FloatingActionButton.extended(
+          onPressed: () async {
+            final res =
+                await context.push<bool>('/management/create-placement');
+            if (res == true && mounted) {
+              await controller.refresh();
+            }
+          },
+          icon: const Icon(Icons.add_rounded),
+          label: const Text('Buat Jadwal Penempatan'),
+        );
+      }
+      if (activeTab == AcademySubTab.trainingOffline) {
+        return FloatingActionButton.extended(
+          onPressed: () async {
+            final res =
+                await context.push<bool>('/management/create-training');
+            if (res == true && mounted) {
+              await controller.refresh();
+            }
+          },
+          icon: const Icon(Icons.add_rounded),
+          label: const Text('Jadwal Training'),
+        );
+      }
+      return null;
+    }
+
     return Scaffold(
-      floatingActionButton: activeTab == AcademySubTab.trainingOffline
-          ? FloatingActionButton.extended(
-              onPressed: () async {
-                final res =
-                    await context.push<bool>('/management/create-training');
-                if (res == true && mounted) {
-                  await controller.refresh();
-                }
-              },
-              icon: const Icon(Icons.add_rounded),
-              label: const Text('Jadwal Training'),
-            )
-          : null,
+      floatingActionButton: buildFab(),
       body: Column(
       children: [
         Container(
@@ -165,7 +205,7 @@ class _AcademyScreenState extends ConsumerState<AcademyScreen> {
               onRetry: controller.refresh,
             ),
             data: (viewState) {
-              final rows = _rows(viewState);
+              final rows = _rows(viewState, controller);
               return RefreshIndicator(
                 onRefresh: controller.refresh,
                 child: rows.isEmpty

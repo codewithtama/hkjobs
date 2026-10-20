@@ -2,6 +2,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:hkjobs_mobile/core/widgets/hk_form_widgets.dart';
 import 'package:hkjobs_mobile/features/academy/domain/academy_models.dart';
 import 'package:hkjobs_mobile/features/interview/domain/interview_models.dart';
+import 'package:hkjobs_mobile/features/management/data/management_repository.dart';
+import 'package:hkjobs_mobile/features/recruitment/domain/recruitment_models.dart';
 
 void main() {
   test('skor interview default lolos (>= 65)', () {
@@ -54,5 +56,118 @@ void main() {
     expect(item.status, 'Tidak lolos');
     expect(item.reason, 'tess');
     expect(item.updatedAt, '30-09-2026 10:27:35');
+  });
+
+  test('VacancyApplicationItem parses listTable2 row correctly', () {
+    final row = <String, Object?>{
+      'DT_RowId': 'useradv_999',
+      '1': '<a href="javascript:void(0)" onclick="editShowPelamar(777)">AHMAD FAUZI</a>',
+      '2': '3201234567890001',
+      '3': '1998-05-12',
+      '4': 'Laki-laki',
+      '5': '081234567890',
+      '6': 'SMA / SMK',
+      '7': 'CLEANING SERVICE',
+      '8': '1 Tahun',
+      '9': '170 cm',
+      '10': '65 kg',
+      '13': 'Belum Menikah',
+      '14': 'ahmad@example.com',
+      '17': 'Jakarta Selatan',
+      '20': '2026-10-15 08:30:00',
+      '21': '<a href="https://ops.hk-indonesia.id/assetshkjobs/ktp/ktp.jpg">KTP</a>',
+      '22': '<label class="badge badge-warning">On Process</label>',
+    };
+    final item = VacancyApplicationItem.fromVacancyApplicantsTableRow(row);
+    expect(item.userAdvertId, 'useradv_999');
+    expect(item.applicantId, '777');
+    expect(item.fullName, 'AHMAD FAUZI');
+    expect(item.nik, '3201234567890001');
+    expect(item.phone, '081234567890');
+    expect(item.email, 'ahmad@example.com');
+    expect(item.lastPosition, 'CLEANING SERVICE');
+    expect(item.city, 'Jakarta Selatan');
+    expect(item.statusText, 'On Process');
+  });
+
+  test('InterviewCandidateItem parses listTable2 participant row correctly', () {
+    final row = <String, Object?>{
+      'DT_RowId': 'row_55',
+      '1': '<a href="javascript:void(0)" onclick="editShowPelamar(333)">BUDI SANTOSO</a>',
+      '4': '2026-10-18',
+      '6': '08987654321',
+      '7': 'Bandung',
+      '8': '1995-02-10',
+      '9': 'SECURITY OFFICER',
+      '13': '<label class="badge badge-success">Passed</label>',
+      '15': 'Nilai memenuhi syarat',
+      '16': '2026-10-19 09:00',
+      '17': 'DIMAS ALFA PRATAMA',
+      '19': 'INT-2026-001',
+    };
+    final item = InterviewCandidateItem.fromScheduleParticipantsTableRow(
+      row,
+      fallbackInterviewCode: 'SCH-001',
+      fallbackVacancyCode: 'VAC-001',
+    );
+    expect(item.fullName, 'BUDI SANTOSO');
+    expect(item.applicantId, '333');
+    expect(item.phone, '08987654321');
+    expect(item.city, 'Bandung');
+    expect(item.status, 'Passed');
+    expect(item.interviewerName, 'DIMAS ALFA PRATAMA');
+    expect(item.interviewCode, 'INT-2026-001');
+  });
+
+  test('PlacementPersonnelItem parses listTable14 row correctly', () {
+    final row = <String, Object?>{
+      'DT_RowId': 'wait_88',
+      '1': 'CITRA LESTARI',
+      '2': 'OPERATOR',
+      '4': 'PROJECT MALL KOTA KASABLANKA',
+      '5': '<a href="/surat-tugas/88.pdf">Unduh</a>',
+      '8': '<label class="badge badge-info">Waiting Approval</label>',
+    };
+    final item = PlacementPersonnelItem.fromDataTableRow(row);
+    expect(item.id, 'wait_88');
+    expect(item.candidateName, 'CITRA LESTARI');
+    expect(item.positionName, 'OPERATOR');
+    expect(item.projectName, 'PROJECT MALL KOTA KASABLANKA');
+    expect(item.status, 'Waiting Approval');
+    expect(item.suratTugasDownloadUrl, '/surat-tugas/88.pdf');
+  });
+
+  test('PlacementDraft formats FormData map to match backend contract', () {
+    const draft = PlacementDraft(
+      projectId: 'PRJ-101',
+      lokasiProject: 'Lobby Tower A',
+      positionId: 'POS-5',
+      quota: '10',
+      tanggal: '2026-11-01',
+      timeStart: '07:30',
+      timeEnd: '16:30',
+    );
+    final map = draft.toFormDataMap();
+    expect(map['projectId'], 'PRJ-101');
+    expect(map['lokasiProject'], 'Lobby Tower A');
+    expect(map['positionId'], 'POS-5');
+    expect(map['kuotaApplicant'], '10');
+    expect(map['tanggal'], '2026-11-01');
+    expect(map['timeStart'], '07:30');
+    expect(map['timeEnd'], '16:30');
+  });
+
+  test('JobVacancyItem formats pdfReportUrl and parses applicantCount', () {
+    const vacancy = JobVacancyItem(
+      id: '105',
+      code: 'HK-CS-2026-001',
+      period: '2026-10-01 s/d 2026-10-31',
+      applicantSummary: '175 Pelamar',
+      status: 'Aktif',
+      createdAt: '2026-10-01',
+    );
+    expect(vacancy.pdfReportUrl, contains('/advertisement/pdf/105'));
+    expect(vacancy.applicantCount, 175);
+    expect(vacancy.qrCodeUrl, contains('ADVERT-105.png'));
   });
 }

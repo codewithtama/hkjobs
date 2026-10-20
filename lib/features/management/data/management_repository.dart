@@ -135,6 +135,37 @@ class TrainingDraft {
   final List<QuotaEntry> quotas;
 }
 
+@immutable
+class PlacementDraft {
+  const PlacementDraft({
+    required this.projectId,
+    required this.lokasiProject,
+    required this.positionId,
+    required this.quota,
+    required this.tanggal,
+    required this.timeStart,
+    required this.timeEnd,
+  });
+
+  final String projectId;
+  final String lokasiProject;
+  final String positionId;
+  final String quota;
+  final String tanggal;
+  final String timeStart;
+  final String timeEnd;
+
+  Map<String, String> toFormDataMap() => <String, String>{
+        'projectId': projectId,
+        'lokasiProject': lokasiProject.trim(),
+        'positionId': positionId,
+        'kuotaApplicant': quota.trim(),
+        'tanggal': tanggal,
+        'timeStart': timeStart,
+        'timeEnd': timeEnd,
+      };
+}
+
 final managementRepositoryProvider = Provider<ManagementRepository>((ref) {
   return ManagementRepository(apiClient: ref.watch(hkJobsApiClientProvider));
 });
@@ -346,6 +377,12 @@ class ManagementRepository {
         map['alamatInterview'] = custom.trim();
       }
       return FormData.fromMap(map);
+    });
+  }
+
+  Future<Result<void>> createPlacement(PlacementDraft d) {
+    return _apiClient.submitForm(ApiEndpoints.placementScheduleCreate, () {
+      return FormData.fromMap(d.toFormDataMap());
     });
   }
 }

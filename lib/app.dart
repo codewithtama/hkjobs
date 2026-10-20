@@ -6,18 +6,24 @@ import 'core/constants/app_strings.dart';
 import 'core/theme/app_theme.dart';
 import 'core/widgets/hk_state_views.dart';
 import 'features/academy/presentation/academy_screen.dart';
+import 'features/academy/presentation/placement_detail_screen.dart';
 import 'features/academy/presentation/training_participants_screen.dart';
+import 'features/app_update/presentation/app_update_controller.dart';
+import 'features/app_update/presentation/widgets/app_update_dialog.dart';
 import 'features/auth/domain/admin_session.dart';
 import 'features/auth/presentation/auth_controller.dart';
 import 'features/auth/presentation/login_screen.dart';
 import 'features/dashboard/presentation/dashboard_screen.dart';
+import 'features/interview/presentation/interview_participants_screen.dart';
 import 'features/interview/presentation/interview_screen.dart';
 import 'features/management/presentation/create_admin_screen.dart';
 import 'features/management/presentation/create_interview_screen.dart';
+import 'features/management/presentation/create_placement_screen.dart';
 import 'features/management/presentation/create_training_screen.dart';
 import 'features/management/presentation/create_vacancy_screen.dart';
 import 'features/organization/presentation/organization_screen.dart';
 import 'features/recruitment/presentation/recruitment_screen.dart';
+import 'features/recruitment/presentation/vacancy_applicants_screen.dart';
 import 'features/scanner/presentation/qr_scanner_screen.dart';
 
 class _RouterRefresh extends ChangeNotifier {
@@ -92,17 +98,43 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (_, _) => const CreateVacancyScreen(),
       ),
       GoRoute(
+        path: '/management/create-placement',
+        builder: (_, _) => const CreatePlacementScreen(),
+      ),
+      GoRoute(
+        path: '/recruitment/applicants/:id',
+        builder: (_, state) => VacancyApplicantsScreen(
+          vacancyId: state.pathParameters['id']!,
+          vacancyCode: state.uri.queryParameters['code'],
+        ),
+      ),
+      GoRoute(
+        path: '/interview/participants/:id',
+        builder: (_, state) => InterviewParticipantsScreen(
+          interviewId: state.pathParameters['id']!,
+          interviewCode: state.uri.queryParameters['code'],
+          vacancyCode: state.uri.queryParameters['vacancy'],
+        ),
+      ),
+      GoRoute(
         path: '/training/participants/:id',
         builder: (_, state) => TrainingParticipantsScreen(
           trainingId: state.pathParameters['id']!,
           trainingCode: state.uri.queryParameters['code'],
         ),
       ),
+      GoRoute(
+        path: '/academy/placement-detail/:id',
+        builder: (_, state) => PlacementDetailScreen(
+          placementId: state.pathParameters['id']!,
+          placementCode: state.uri.queryParameters['code'],
+        ),
+      ),
     ],
   );
 });
 
-class _Shell extends ConsumerWidget {
+class _Shell extends ConsumerStatefulWidget {
   const _Shell({required this.tab, required this.child});
 
   final int tab;
@@ -117,10 +149,67 @@ class _Shell extends ConsumerWidget {
   ];
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<_Shell> createState() => _ShellState();
+}
+
+class _ShellState extends ConsumerState<_Shell> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(appUpdateControllerProvider.notifier).checkForUpdates();
+    });
+  }
+
+  Future<void> _manualCheckUpdate() async {
+    final info = await ref
+        .read(appUpdateControllerProvider.notifier)
+        .checkForUpdates(isManual: true);
+    if (!mounted) return;
+    if (info != null) {
+      if (info.hasUpdate) {
+        await AppUpdateDialog.show(context, info);
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Aplikasi sudah versi terbaru (v${info.currentVersion})',
+            ),
+          ),
+        );
+      }
+    } else {
+      final err = ref.read(appUpdateControllerProvider).errorMessage;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(err ?? 'Gagal memeriksa pembaruan aplikasi.'),
+        ),
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    ref.listen<AppUpdateState>(appUpdateControllerProvider, (prev, next) {
+      final info = next.info;
+      if (info != null && info.hasUpdate && !next.hasDismissed) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) {
+            AppUpdateDialog.show(context, info);
+          }
+        });
+      }
+    });
+
     final session = ref.watch(authControllerProvider).valueOrNull;
+    final updateState = ref.watch(appUpdateControllerProvider);
+    final hasUpdate = updateState.info?.hasUpdate == true;
+
     final isAdmin = session?.role == AdminRole.superAdmin ||
         session?.role == AdminRole.supervisor;
+
+    final canScanQr = session?.role == AdminRole.interviewer ||
+        session?.role == AdminRole.trainer;
 
     return Scaffold(
       appBar: AppBar(
@@ -135,23 +224,75 @@ class _Shell extends ConsumerWidget {
               ),
             ),
           ),
-          IconButton(
-            tooltip: 'Pindai QR',
-            onPressed: () => context.push('/scanner'),
-            icon: const Icon(Icons.qr_code_scanner_rounded),
+          if (hasUpdate)
+            IconButton(
+              tooltip:
+                  'Pembaruan v${updateState.info!.latestVersion} Tersedia',
+              onPressed: () =>
+                  AppUpdateDialog.show(context, updateState.info!),
+              icon: const Badge(
+                smallSize: 8,
+                child: Icon(
+                  Icons.system_update_rounded,
+                  color: Color(0xFFD85B1C),
+                ),
+              ),
+            ),
+          PopupMenuButton<String>(
+            tooltip: 'Opsi Lainnya',
+            icon: const Icon(Icons.more_vert_rounded),
+            onSelected: (val) {
+              if (val == 'update') {
+                _manualCheckUpdate();
+              } else if (val == 'logout') {
+                ref.read(authControllerProvider.notifier).signOut();
+              }
+            },
+            itemBuilder: (context) => [
+              PopupMenuItem<String>(
+                value: 'update',
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.sync_rounded,
+                      size: 20,
+                      color: hasUpdate
+                          ? const Color(0xFFD85B1C)
+                          : context.colors.textPrimary,
+                    ),
+                    const SizedBox(width: 10),
+                    Text(
+                      hasUpdate
+                          ? 'Perbarui Aplikasi (v${updateState.info!.latestVersion})'
+                          : 'Cek Pembaruan',
+                    ),
+                  ],
+                ),
+              ),
+              const PopupMenuItem<String>(
+                value: 'logout',
+                child: Row(
+                  children: [
+                    Icon(Icons.logout_rounded, size: 20),
+                    SizedBox(width: 10),
+                    Text(AppStrings.logoutLabel),
+                  ],
+                ),
+              ),
+            ],
           ),
-          IconButton(
-            tooltip: AppStrings.logoutLabel,
-            onPressed: () =>
-                ref.read(authControllerProvider.notifier).signOut(),
-            icon: const Icon(Icons.logout_rounded),
-          ),
+          if (canScanQr)
+            IconButton(
+              tooltip: 'Pindai QR Kehadiran',
+              onPressed: () => context.push('/scanner'),
+              icon: const Icon(Icons.qr_code_scanner_rounded),
+            ),
         ],
       ),
-      body: child,
+      body: widget.child,
       bottomNavigationBar: NavigationBar(
-        selectedIndex: tab,
-        onDestinationSelected: (i) => context.go(_paths[i]),
+        selectedIndex: widget.tab,
+        onDestinationSelected: (i) => context.go(_Shell._paths[i]),
         destinations: [
           const NavigationDestination(
             icon: Icon(Icons.space_dashboard_outlined),

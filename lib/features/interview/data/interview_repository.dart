@@ -8,6 +8,8 @@ import '../../auth/domain/admin_session.dart';
 import '../../recruitment/data/recruitment_repository.dart';
 import '../domain/interview_models.dart';
 
+export '../../recruitment/data/recruitment_repository.dart' show PaginatedList;
+
 final interviewRepositoryProvider = Provider<InterviewRepository>((ref) {
   return InterviewRepository(apiClient: ref.watch(hkJobsApiClientProvider));
 });
@@ -40,6 +42,41 @@ class InterviewRepository {
             data.rows.map(InterviewScheduleItem.fromDataTableRow).toList();
         return Success<PaginatedList<InterviewScheduleItem>>(
           PaginatedList<InterviewScheduleItem>(
+            totalCount: data.totalRecords,
+            items: items,
+          ),
+        );
+    }
+  }
+
+  Future<Result<PaginatedList<InterviewCandidateItem>>> fetchInterviewParticipants(
+    String interviewId, {
+    String searchQuery = '',
+    String vacancyCode = '',
+    String interviewCode = '',
+    int limit = 50,
+  }) async {
+    final res = await _apiClient.fetchDataTable(
+      endpoint: ApiEndpoints.interviewParticipantsTable(interviewId),
+      length: limit,
+      searchQuery: searchQuery,
+    );
+    switch (res) {
+      case Failure<ParsedDataTableResult>(:final error):
+        return Failure<PaginatedList<InterviewCandidateItem>>(error);
+      case Success<ParsedDataTableResult>(:final data):
+        final items = data.rows
+            .map(
+              (row) =>
+                  InterviewCandidateItem.fromScheduleParticipantsTableRow(
+                row,
+                fallbackVacancyCode: vacancyCode,
+                fallbackInterviewCode: interviewCode,
+              ),
+            )
+            .toList();
+        return Success<PaginatedList<InterviewCandidateItem>>(
+          PaginatedList<InterviewCandidateItem>(
             totalCount: data.totalRecords,
             items: items,
           ),

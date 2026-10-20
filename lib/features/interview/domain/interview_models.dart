@@ -40,6 +40,14 @@ class InterviewScheduleItem {
 
   String get qrCodeUrl => '${ApiEndpoints.qrCodeBaseUrl}SCHEDULE-$id.png';
 
+  int get candidateCount {
+    final match = RegExp(r'(\d+)').firstMatch(confirmedCount);
+    if (match != null) {
+      return int.tryParse(match.group(1)!) ?? 0;
+    }
+    return 0;
+  }
+
   factory InterviewScheduleItem.fromDataTableRow(Map<String, Object?> row) {
     final id = (row['DT_RowId'] ?? '').toString();
     return InterviewScheduleItem(
@@ -111,6 +119,40 @@ class InterviewCandidateItem {
       interviewerName: HtmlCellParser.stripHtml(row['12']),
       vacancyCode: HtmlCellParser.stripHtml(row['14']),
       interviewCode: HtmlCellParser.stripHtml(row['15']),
+    );
+  }
+
+  factory InterviewCandidateItem.fromScheduleParticipantsTableRow(
+    Map<String, Object?> row, {
+    String fallbackVacancyCode = '',
+    String fallbackInterviewCode = '',
+  }) {
+    final rowId = (row['DT_RowId'] ?? '').toString();
+    final appId =
+        HtmlCellParser.extractFirstFunctionArg(row['1'], 'editShowPelamar') ??
+            rowId;
+
+    final interviewCodeRaw =
+        row.containsKey('19') ? HtmlCellParser.stripHtml(row['19']) : '';
+    final code = interviewCodeRaw.isNotEmpty && interviewCodeRaw != '-'
+        ? interviewCodeRaw
+        : fallbackInterviewCode;
+
+    return InterviewCandidateItem(
+      userAdvertId: rowId,
+      applicantId: appId,
+      fullName: HtmlCellParser.stripHtml(row['1']),
+      applyDate: HtmlCellParser.stripHtml(row['4']),
+      phone: HtmlCellParser.stripHtml(row['6']),
+      city: HtmlCellParser.stripHtml(row['7']),
+      birthInfo: HtmlCellParser.stripHtml(row['8']),
+      adminName: HtmlCellParser.stripHtml(row['9']),
+      status: HtmlCellParser.stripHtml(row['13']),
+      reason: HtmlCellParser.stripHtml(row['15']),
+      attendanceTime: HtmlCellParser.stripHtml(row['16']),
+      interviewerName: HtmlCellParser.stripHtml(row['17']),
+      vacancyCode: fallbackVacancyCode,
+      interviewCode: code,
     );
   }
 }

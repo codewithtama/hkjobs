@@ -5,7 +5,6 @@ import '../../../core/constants/form_strings.dart';
 import '../../../core/errors/app_failure.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/hk_state_views.dart';
-import '../../recruitment/data/recruitment_repository.dart' show PaginatedList;
 import '../data/academy_repository.dart';
 import '../domain/academy_models.dart';
 

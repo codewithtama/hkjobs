@@ -6,9 +6,9 @@ import '../../../core/constants/app_strings.dart';
 import '../../../core/errors/app_failure.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/hk_state_views.dart';
-import '../data/interview_repository.dart';
 import '../domain/interview_models.dart';
 import 'interview_controller.dart';
+import 'widgets/interview_evaluation_sheet.dart';
 
 class InterviewScreen extends ConsumerStatefulWidget {
   const InterviewScreen({super.key});
@@ -38,12 +38,16 @@ class _InterviewScreenState extends ConsumerState<InterviewScreen> {
     );
   }
 
+  void _openScheduleParticipants(InterviewScheduleItem item) {
+    context.push(
+      '/interview/participants/${item.id}?code=${item.code}&vacancy=${item.vacancyCode}',
+    );
+  }
+
   Future<void> _openEvaluationSheet(InterviewCandidateItem candidate) async {
-    final saved = await showModalBottomSheet<bool>(
-      context: context,
-      isScrollControlled: true,
-      useSafeArea: true,
-      builder: (_) => _InterviewEvaluationSheet(candidate: candidate),
+    final saved = await InterviewEvaluationSheet.show(
+      context,
+      candidate: candidate,
     );
     if (saved == true && mounted) {
       await ref.read(interviewControllerProvider.notifier).refresh();
@@ -70,71 +74,71 @@ class _InterviewScreenState extends ConsumerState<InterviewScreen> {
       body: Column(
         children: [
           Container(
-          color: context.colors.surfaceCard,
-          padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
-          child: Column(
-            children: [
-              SizedBox(
-                height: 44,
-                child: ListView.separated(
-                  scrollDirection: Axis.horizontal,
-                  itemCount: InterviewSubTab.values.length,
-                  separatorBuilder: (_, _) => const SizedBox(width: 8),
-                  itemBuilder: (context, index) {
-                    final tab = InterviewSubTab.values[index];
-                    return ChoiceChip(
-                      label: Text(tab.label),
-                      selected: tab == activeTab,
-                      onSelected: (_) => ref
-                          .read(interviewControllerProvider.notifier)
-                          .selectTab(tab),
-                    );
+            color: context.colors.surfaceCard,
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+            child: Column(
+              children: [
+                SizedBox(
+                  height: 44,
+                  child: ListView.separated(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: InterviewSubTab.values.length,
+                    separatorBuilder: (_, _) => const SizedBox(width: 8),
+                    itemBuilder: (context, index) {
+                      final tab = InterviewSubTab.values[index];
+                      return ChoiceChip(
+                        label: Text(tab.label),
+                        selected: tab == activeTab,
+                        onSelected: (_) => ref
+                            .read(interviewControllerProvider.notifier)
+                            .selectTab(tab),
+                      );
+                    },
+                  ),
+                ),
+                const SizedBox(height: 10),
+                HkSearchField(
+                  controller: _searchController,
+                  onSubmitted: (q) => ref
+                      .read(interviewControllerProvider.notifier)
+                      .updateSearch(q),
+                  onClear: () {
+                    _searchController.clear();
+                    ref
+                        .read(interviewControllerProvider.notifier)
+                        .updateSearch('');
                   },
                 ),
-              ),
-              const SizedBox(height: 10),
-              HkSearchField(
-                controller: _searchController,
-                onSubmitted: (q) => ref
-                    .read(interviewControllerProvider.notifier)
-                    .updateSearch(q),
-                onClear: () {
-                  _searchController.clear();
-                  ref
-                      .read(interviewControllerProvider.notifier)
-                      .updateSearch('');
-                },
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
-        const Divider(height: 1),
-        Expanded(
-          child: asyncState.when(
-            loading: () =>
-                const HkLoadingView(message: AppStrings.loadingInterviews),
-            error: (err, _) {
-              final msg = err is AppFailure ? err.message : err.toString();
-              return HkErrorView(
-                message: msg,
-                onRetry: () =>
-                    ref.read(interviewControllerProvider.notifier).refresh(),
-              );
-            },
-            data: (viewState) {
-              return RefreshIndicator(
-                onRefresh: () =>
-                    ref.read(interviewControllerProvider.notifier).refresh(),
-                child: viewState.activeTab == InterviewSubTab.schedules
-                    ? _buildScheduleList(viewState.schedules)
-                    : _buildCandidateList(viewState.candidates),
-              );
-            },
+          const Divider(height: 1),
+          Expanded(
+            child: asyncState.when(
+              loading: () =>
+                  const HkLoadingView(message: AppStrings.loadingInterviews),
+              error: (err, _) {
+                final msg = err is AppFailure ? err.message : err.toString();
+                return HkErrorView(
+                  message: msg,
+                  onRetry: () =>
+                      ref.read(interviewControllerProvider.notifier).refresh(),
+                );
+              },
+              data: (viewState) {
+                return RefreshIndicator(
+                  onRefresh: () =>
+                      ref.read(interviewControllerProvider.notifier).refresh(),
+                  child: viewState.activeTab == InterviewSubTab.schedules
+                      ? _buildScheduleList(viewState.schedules)
+                      : _buildCandidateList(viewState.candidates),
+                );
+              },
+            ),
           ),
-        ),
-      ],
-    ),
-  );
+        ],
+      ),
+    );
   }
 
   Widget _buildScheduleList(List<InterviewScheduleItem> items) {
@@ -149,6 +153,7 @@ class _InterviewScreenState extends ConsumerState<InterviewScreen> {
           child: _ScheduleCard(
             item: item,
             onShowQr: () => _openScheduleQr(item),
+            onViewParticipants: () => _openScheduleParticipants(item),
           ),
         );
       },
@@ -178,63 +183,81 @@ class _ScheduleCard extends StatelessWidget {
   const _ScheduleCard({
     required this.item,
     required this.onShowQr,
+    required this.onViewParticipants,
   });
 
   final InterviewScheduleItem item;
   final VoidCallback onShowQr;
+  final VoidCallback onViewParticipants;
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: colors.surfaceCard,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: colors.border),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Expanded(
-                child: Text(
-                  item.code,
-                  style: context.monoStyle.copyWith(
-                    color: colors.accent,
-                    fontSize: 13.5,
+    final countLabel = item.candidateCount > 0
+        ? '${item.candidateCount} Peserta'
+        : 'Lihat Peserta';
+
+    return InkWell(
+      borderRadius: BorderRadius.circular(14),
+      onTap: onViewParticipants,
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: colors.surfaceCard,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: colors.border),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    item.code,
+                    style: context.monoStyle.copyWith(
+                      color: colors.accent,
+                      fontSize: 13.5,
+                    ),
                   ),
                 ),
-              ),
-              HkStatusBadge.fromStatusText(item.status),
-            ],
-          ),
-          const SizedBox(height: 6),
-          Text(
-            item.vacancyCode,
-            style: context.textStyles.titleMedium,
-          ),
-          const SizedBox(height: 6),
-          Text(
-            'Jadwal: ${item.date} (${item.timeRange})',
-            style: context.textStyles.bodyMedium,
-          ),
-          const SizedBox(height: 4),
-          Text(
-            'Kuota maks: ${item.maxQuota} • Dikonfirmasi: ${item.confirmedCount}',
-            style: context.textStyles.bodySmall,
-          ),
-          const SizedBox(height: 12),
-          Align(
-            alignment: Alignment.centerRight,
-            child: OutlinedButton.icon(
-              onPressed: onShowQr,
-              icon: const Icon(Icons.qr_code_scanner_rounded, size: 18),
-              label: const Text('QR Kehadiran'),
+                HkStatusBadge.fromStatusText(item.status),
+              ],
             ),
-          ),
-        ],
+            const SizedBox(height: 6),
+            Text(
+              item.vacancyCode,
+              style: context.textStyles.titleMedium,
+            ),
+            const SizedBox(height: 6),
+            Text(
+              'Jadwal: ${item.date} (${item.timeRange})',
+              style: context.textStyles.bodyMedium,
+            ),
+            const SizedBox(height: 4),
+            Text(
+              'Kuota maks: ${item.maxQuota} • Dikonfirmasi: ${item.confirmedCount}',
+              style: context.textStyles.bodySmall,
+            ),
+            const SizedBox(height: 12),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                OutlinedButton.icon(
+                  onPressed: onShowQr,
+                  icon: const Icon(Icons.qr_code_scanner_rounded, size: 18),
+                  label: const Text('QR Kehadiran'),
+                ),
+                const SizedBox(width: 8),
+                FilledButton.tonalIcon(
+                  onPressed: onViewParticipants,
+                  icon: const Icon(Icons.groups_outlined, size: 18),
+                  label: Text(countLabel),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -312,279 +335,4 @@ class _CandidateCard extends StatelessWidget {
   }
 }
 
-class _InterviewEvaluationSheet extends ConsumerStatefulWidget {
-  const _InterviewEvaluationSheet({required this.candidate});
 
-  final InterviewCandidateItem candidate;
-
-  @override
-  ConsumerState<_InterviewEvaluationSheet> createState() =>
-      _InterviewEvaluationSheetState();
-}
-
-class _InterviewEvaluationSheetState
-    extends ConsumerState<_InterviewEvaluationSheet> {
-  InterviewEvaluationRubric _rubric = const InterviewEvaluationRubric();
-  final TextEditingController _reasonController = TextEditingController();
-  bool _submitting = false;
-  String? _errorText;
-
-  @override
-  void dispose() {
-    _reasonController.dispose();
-    super.dispose();
-  }
-
-  Future<void> _submit() async {
-    setState(() {
-      _submitting = true;
-      _errorText = null;
-    });
-    final repo = ref.read(interviewRepositoryProvider);
-    final res = await repo.submitEvaluation(
-      userAdvertId: widget.candidate.userAdvertId,
-      rubric: _rubric,
-      failureReason: _reasonController.text,
-    );
-    if (!mounted) return;
-    switch (res) {
-      case Success<void>():
-        Navigator.of(context).pop(true);
-      case Failure<void>(:final error):
-        setState(() {
-          _submitting = false;
-          _errorText = error.message;
-        });
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    final passed = _rubric.isPassed;
-
-    return DraggableScrollableSheet(
-      expand: false,
-      initialChildSize: 0.88,
-      minChildSize: 0.6,
-      maxChildSize: 0.96,
-      builder: (context, scrollController) {
-        return ListView(
-          controller: scrollController,
-          padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
-          children: [
-            Text(
-              AppStrings.evaluateCandidateTitle,
-              style: context.textStyles.titleLarge,
-            ),
-            const SizedBox(height: 4),
-            Text(
-              '${widget.candidate.fullName} (${widget.candidate.interviewCode})',
-              style: context.monoStyle.copyWith(color: colors.accent),
-            ),
-            const SizedBox(height: 14),
-            Container(
-              padding: const EdgeInsets.all(14),
-              decoration: BoxDecoration(
-                color: passed ? colors.successMuted : colors.dangerMuted,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          passed
-                              ? 'Status: LOLOS (Passed)'
-                              : 'Status: GAGAL (Failed)',
-                          style: context.textStyles.titleMedium?.copyWith(
-                            color: passed ? colors.success : colors.danger,
-                          ),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          AppStrings.passingThresholdNote,
-                          style: context.textStyles.bodySmall,
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Text(
-                    '${_rubric.totalScore}',
-                    style: context.monoStyle.copyWith(
-                      fontSize: 28,
-                      color: passed ? colors.success : colors.danger,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            if (_errorText != null) ...[
-              const SizedBox(height: 12),
-              Text(
-                _errorText!,
-                style: context.textStyles.bodySmall?.copyWith(
-                  color: colors.danger,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-            ],
-            const SizedBox(height: 16),
-            _VerificationSwitchRow(
-              label: 'Verifikasi data diri (+10 / -25)',
-              value: _rubric.dataDiriSesuai,
-              onChanged: (v) =>
-                  setState(() => _rubric = _rubric.copyWith(dataDiriSesuai: v)),
-            ),
-            _VerificationSwitchRow(
-              label: 'Verifikasi fisik (+10 / -25)',
-              value: _rubric.fisikSesuai,
-              onChanged: (v) =>
-                  setState(() => _rubric = _rubric.copyWith(fisikSesuai: v)),
-            ),
-            _VerificationSwitchRow(
-              label: 'Pengalaman kerja ada (+5 / 0)',
-              value: _rubric.pengalamanAda,
-              onChanged: (v) =>
-                  setState(() => _rubric = _rubric.copyWith(pengalamanAda: v)),
-            ),
-            _VerificationSwitchRow(
-              label: 'Pengalaman sesuai posisi (+5 / 0)',
-              value: _rubric.pengalamanSesuai,
-              onChanged: (v) => setState(
-                () => _rubric = _rubric.copyWith(pengalamanSesuai: v),
-              ),
-            ),
-            _VerificationSwitchRow(
-              label: 'Verifikasi ijazah asli (+5 / 0)',
-              value: _rubric.ijazahSesuai,
-              onChanged: (v) =>
-                  setState(() => _rubric = _rubric.copyWith(ijazahSesuai: v)),
-            ),
-            _VerificationSwitchRow(
-              label: 'Verifikasi SKCK (+5 / 0)',
-              value: _rubric.skckSesuai,
-              onChanged: (v) =>
-                  setState(() => _rubric = _rubric.copyWith(skckSesuai: v)),
-            ),
-            _VerificationSwitchRow(
-              label: 'Verifikasi SIO (+5 / 0)',
-              value: _rubric.sioSesuai,
-              onChanged: (v) =>
-                  setState(() => _rubric = _rubric.copyWith(sioSesuai: v)),
-            ),
-            const Divider(height: 24),
-            _RateSelectorRow(
-              title: 'Skor penampilan / Grooming',
-              selectedValue: _rubric.groomingRate,
-              onSelected: (v) =>
-                  setState(() => _rubric = _rubric.copyWith(groomingRate: v)),
-            ),
-            const SizedBox(height: 12),
-            _RateSelectorRow(
-              title: 'Skor intelejensi',
-              selectedValue: _rubric.intelejenRate,
-              onSelected: (v) =>
-                  setState(() => _rubric = _rubric.copyWith(intelejenRate: v)),
-            ),
-            const SizedBox(height: 12),
-            _RateSelectorRow(
-              title: 'Skor komunikasi',
-              selectedValue: _rubric.komunikasiRate,
-              onSelected: (v) =>
-                  setState(() => _rubric = _rubric.copyWith(komunikasiRate: v)),
-            ),
-            if (!passed) ...[
-              const SizedBox(height: 16),
-              TextField(
-                controller: _reasonController,
-                maxLines: 2,
-                decoration: const InputDecoration(
-                  labelText: 'Alasan gagal interview (Wajib jika skor ≤ 64)',
-                ),
-              ),
-            ],
-            const SizedBox(height: 24),
-            FilledButton(
-              onPressed: _submitting ? null : _submit,
-              child: _submitting
-                  ? const SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : const Text(AppStrings.submitEvaluationButton),
-            ),
-          ],
-        );
-      },
-    );
-  }
-}
-
-class _VerificationSwitchRow extends StatelessWidget {
-  const _VerificationSwitchRow({
-    required this.label,
-    required this.value,
-    required this.onChanged,
-  });
-
-  final String label;
-  final bool value;
-  final ValueChanged<bool> onChanged;
-
-  @override
-  Widget build(BuildContext context) {
-    return SwitchListTile.adaptive(
-      contentPadding: EdgeInsets.zero,
-      title: Text(label, style: context.textStyles.bodyMedium),
-      subtitle: Text(
-        value ? 'Sesuai / Ada' : 'Tidak sesuai / Tidak ada',
-        style: context.textStyles.bodySmall,
-      ),
-      value: value,
-      onChanged: onChanged,
-    );
-  }
-}
-
-class _RateSelectorRow extends StatelessWidget {
-  const _RateSelectorRow({
-    required this.title,
-    required this.selectedValue,
-    required this.onSelected,
-  });
-
-  final String title;
-  final int selectedValue;
-  final ValueChanged<int> onSelected;
-
-  static const List<int> _options = <int>[2, 4, 6, 8, 10];
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(title, style: context.textStyles.titleSmall),
-        const SizedBox(height: 6),
-        Wrap(
-          spacing: 8,
-          children: _options
-              .map(
-                (score) => ChoiceChip(
-                  label: Text('+$score'),
-                  selected: selectedValue == score,
-                  onSelected: (_) => onSelected(score),
-                ),
-              )
-              .toList(),
-        ),
-      ],
-    );
-  }
-}

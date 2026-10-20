@@ -105,6 +105,24 @@ abstract final class FormStrings {
       'Tindakan ini tidak dapat dibatalkan dari aplikasi.';
   static const String createTrainingAction = 'Buat jadwal training';
 
+  // Penempatan
+  static const String createPlacementTitle = 'Buat jadwal penempatan';
+  static const String createPlacementAction = 'Buat jadwal penempatan';
+  static const String placementProject = 'Lokasi project';
+  static const String placementLocation = 'Alamat / area project';
+  static const String placementPosition = 'Nama posisi';
+  static const String placementQuota = 'Kuota penempatan';
+  static const String placementDate = 'Tanggal penempatan';
+  static const String placementTimeStart = 'Jam mulai';
+  static const String placementTimeEnd = 'Jam selesai';
+  static const String placementPersonnelTitle = 'Personel penempatan';
+  static const String loadingPersonnel = 'Memuat personel penempatan...';
+  static const String vacancyApplicantsTitle = 'Pelamar lowongan';
+  static const String loadingVacancyApplicants = 'Memuat pelamar lowongan...';
+  static const String interviewParticipantsTitle = 'Peserta interview';
+  static const String loadingInterviewParticipants =
+      'Memuat peserta jadwal interview...';
+
   // QR
   static const String scanTitle = 'Pindai QR';
   static const String scanHint =

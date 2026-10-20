@@ -49,6 +49,32 @@ class RecruitmentRepository {
     }
   }
 
+  Future<Result<PaginatedList<VacancyApplicationItem>>> fetchVacancyApplicants(
+    String advertId, {
+    String searchQuery = '',
+    int limit = 50,
+  }) async {
+    final res = await _apiClient.fetchDataTable(
+      endpoint: ApiEndpoints.advertisementApplicantsTable(advertId),
+      length: limit,
+      searchQuery: searchQuery,
+    );
+    switch (res) {
+      case Failure<ParsedDataTableResult>(:final error):
+        return Failure<PaginatedList<VacancyApplicationItem>>(error);
+      case Success<ParsedDataTableResult>(:final data):
+        final items = data.rows
+            .map(VacancyApplicationItem.fromVacancyApplicantsTableRow)
+            .toList();
+        return Success<PaginatedList<VacancyApplicationItem>>(
+          PaginatedList<VacancyApplicationItem>(
+            totalCount: data.totalRecords,
+            items: items,
+          ),
+        );
+    }
+  }
+
   Future<Result<PaginatedList<VacancyApplicationItem>>> fetchApplicationsByTab({
     required RecruitmentSubTab tab,
     String searchQuery = '',

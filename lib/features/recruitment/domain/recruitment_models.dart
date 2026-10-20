@@ -34,6 +34,15 @@ class JobVacancyItem {
   final String createdAt;
 
   String get qrCodeUrl => '${ApiEndpoints.qrCodeBaseUrl}ADVERT-$id.png';
+  String get pdfReportUrl => '${ApiEndpoints.baseUrl}advertisement/pdf/$id';
+
+  int get applicantCount {
+    final match = RegExp(r'(\d+)').firstMatch(applicantSummary);
+    if (match != null) {
+      return int.tryParse(match.group(1)!) ?? 0;
+    }
+    return 0;
+  }
 
   factory JobVacancyItem.fromDataTableRow(Map<String, Object?> row) {
     final id = (row['DT_RowId'] ?? '').toString();
@@ -116,6 +125,40 @@ class VacancyApplicationItem {
       education: HtmlCellParser.stripHtml(row['17']),
       lastPosition: HtmlCellParser.stripHtml(row['18']),
       experience: HtmlCellParser.stripHtml(row['19']),
+      applyDate: HtmlCellParser.stripHtml(row['20']),
+      documentUrls: HtmlCellParser.extractHrefs(row['21']),
+      statusText: row.containsKey('22')
+          ? HtmlCellParser.stripHtml(row['22'])
+          : defaultStatus,
+    );
+  }
+
+  factory VacancyApplicationItem.fromVacancyApplicantsTableRow(
+    Map<String, Object?> row, {
+    String defaultStatus = 'On Process',
+  }) {
+    final rowId = (row['DT_RowId'] ?? '').toString();
+    final extractedAppId =
+        HtmlCellParser.extractFirstFunctionArg(row['1'], 'editShowPelamar') ??
+            HtmlCellParser.extractTrailingPathId(row['1']) ??
+            rowId;
+
+    return VacancyApplicationItem(
+      userAdvertId: rowId,
+      applicantId: extractedAppId,
+      fullName: HtmlCellParser.stripHtml(row['1']),
+      nik: HtmlCellParser.stripHtml(row['2']),
+      birthDate: HtmlCellParser.stripHtml(row['3']),
+      gender: HtmlCellParser.stripHtml(row['4']),
+      phone: HtmlCellParser.stripHtml(row['5']),
+      education: HtmlCellParser.stripHtml(row['6']),
+      lastPosition: HtmlCellParser.stripHtml(row['7']),
+      experience: HtmlCellParser.stripHtml(row['8']),
+      heightCm: HtmlCellParser.stripHtml(row['9']),
+      weightKg: HtmlCellParser.stripHtml(row['10']),
+      maritalStatus: HtmlCellParser.stripHtml(row['13']),
+      email: HtmlCellParser.stripHtml(row['14']),
+      city: HtmlCellParser.stripHtml(row['17']),
       applyDate: HtmlCellParser.stripHtml(row['20']),
       documentUrls: HtmlCellParser.extractHrefs(row['21']),
       statusText: row.containsKey('22')

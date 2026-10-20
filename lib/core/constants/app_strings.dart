@@ -65,6 +65,8 @@ abstract final class AppStrings {
   static const String emptyListSubtitle =
       'Coba ubah kata kunci pencarian atau muat ulang halaman ini.';
   static const String viewQrButton = 'Lihat QR';
+  static const String viewApplicantsButton = 'Lihat pelamar';
+  static const String viewCandidatesButton = 'Lihat peserta';
   static const String reviewApplicantButton = 'Review berkas';
   static const String detailApplicantButton = 'Biodata & dokumen';
 
