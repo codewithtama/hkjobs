@@ -111,5 +111,35 @@ void main() {
       );
       expect(info.releaseTitle, equals('Rilis Perbaikan Produksi 1.0.2'));
     });
+
+    test('parses version.json manifest payload correctly', () {
+      final manifestJson = <String, Object?>{
+        'version': '1.0.1',
+        'buildNumber': '4',
+        'title': 'Rilis v1.0.1 (Build 4)',
+        'releaseNotes': 'Pembaruan otomatis tanpa batas kuota.',
+        'apkUrl':
+            'https://github.com/codewithtama/hkjobs/releases/download/v1.0.1/hkjobs-release.apk',
+        'htmlUrl': 'https://github.com/codewithtama/hkjobs/releases/tag/v1.0.1',
+        'publishedAt': '2026-10-20T16:00:40Z',
+      };
+
+      final info = UpdateInfo.fromManifestJson(
+        json: manifestJson,
+        currentVersion: '1.0.0',
+        currentBuild: '1',
+      );
+
+      expect(info.hasUpdate, isTrue);
+      expect(info.latestVersion, equals('1.0.1'));
+      expect(info.currentVersion, equals('1.0.0+1'));
+      expect(
+        info.apkDownloadUrl,
+        equals(
+          'https://github.com/codewithtama/hkjobs/releases/download/v1.0.1/hkjobs-release.apk',
+        ),
+      );
+      expect(info.releaseTitle, equals('Rilis v1.0.1 (Build 4)'));
+    });
   });
 }

@@ -1,0 +1,9 @@
+{
+  "version": "1.0.1",
+  "buildNumber": "4",
+  "title": "Rilis v1.0.1 (Build 4)",
+  "releaseNotes": "Pembaruan rilis v1.0.1:\n• Perbaikan jadwal penempatan (Table 13)\n• Penambahan aksi unduh Surat Tugas resmi\n• Penonaktifan otomatis tombol Bypass Ops untuk personel yang telah diterima di proyek\n• Optimasi pembaruan aplikasi otomatis tanpa batasan kuota GitHub API",
+  "apkUrl": "https://github.com/codewithtama/hkjobs/releases/download/v1.0.1/hkjobs-release.apk",
+  "htmlUrl": "https://github.com/codewithtama/hkjobs/releases/tag/v1.0.1",
+  "publishedAt": "2026-10-20T16:00:40Z"
+}

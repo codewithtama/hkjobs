@@ -112,4 +112,50 @@ class UpdateInfo {
       publishedAt: publishedAt,
     );
   }
+
+  factory UpdateInfo.fromManifestJson({
+    required Map<String, Object?> json,
+    required String currentVersion,
+    required String currentBuild,
+  }) {
+    final version = (json['version'] ?? '').toString();
+    final buildNumber = (json['buildNumber'] ?? '0').toString();
+    final tagName = version.isNotEmpty
+        ? (version.startsWith('v') || version.startsWith('V')
+            ? version
+            : 'v$version')
+        : '';
+    final combinedLatestTag = buildNumber.isNotEmpty && buildNumber != '0'
+        ? '$tagName+$buildNumber'
+        : tagName;
+    final releaseTitle = (json['title'] ?? 'Rilis $tagName').toString();
+    final releaseNotes =
+        (json['releaseNotes'] ?? 'Pembaruan aplikasi tersedia.').toString();
+    final apkUrl = (json['apkUrl'] ?? '').toString();
+    final htmlUrl = (json['htmlUrl'] ?? '').toString();
+    final publishedAtStr = json['publishedAt']?.toString();
+    final publishedAt =
+        publishedAtStr != null ? DateTime.tryParse(publishedAtStr) : null;
+
+    final hasUpdate = isVersionNewer(
+      latestTag: combinedLatestTag,
+      currentVersion: currentVersion,
+      currentBuild: currentBuild,
+    );
+
+    return UpdateInfo(
+      currentVersion: currentBuild.isNotEmpty && currentBuild != '0'
+          ? '$currentVersion+$currentBuild'
+          : currentVersion,
+      latestVersion: version.replaceFirst(RegExp(r'^[vV]'), ''),
+      releaseTitle: releaseTitle,
+      releaseNotes: releaseNotes,
+      htmlUrl: htmlUrl.isNotEmpty
+          ? htmlUrl
+          : 'https://github.com/codewithtama/hkjobs/releases',
+      hasUpdate: hasUpdate,
+      apkDownloadUrl: apkUrl.isNotEmpty ? apkUrl : null,
+      publishedAt: publishedAt,
+    );
+  }
 }
