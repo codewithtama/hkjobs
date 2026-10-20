@@ -79,6 +79,12 @@ abstract final class HtmlCellParser {
         rows.add(
           item.map((key, value) => MapEntry(key.toString(), value)),
         );
+      } else if (item is List) {
+        final rowMap = <String, Object?>{};
+        for (var i = 0; i < item.length; i++) {
+          rowMap[i.toString()] = item[i];
+        }
+        rows.add(rowMap);
       }
     }
     return ParsedDataTableResult(totalRecords: total, rows: rows);

@@ -142,6 +142,7 @@ class AcademyController extends AsyncNotifier<AcademyViewState> {
   Future<void> selectTab(AcademySubTab tab) async {
     if (_activeTab == tab) return;
     _activeTab = tab;
+    _searchQuery = '';
     state = const AsyncLoading<AcademyViewState>();
     state = await AsyncValue.guard(_fetchCurrent);
   }

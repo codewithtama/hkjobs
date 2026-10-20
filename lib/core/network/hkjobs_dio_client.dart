@@ -227,13 +227,15 @@ class HkJobsApiClient {
     Map<String, Object?> formFields,
   ) async {
     try {
-      var response = await _dio.post<String>(path, data: formFields);
+      final formData = FormData.fromMap(formFields);
+      var response = await _dio.post<String>(path, data: formData);
       if (_isRedirectedToLogin(response)) {
         final refreshed = await _ensureValidSession();
         if (!refreshed) {
           return const Failure<String>(SessionExpiredFailure());
         }
-        response = await _dio.post<String>(path, data: formFields);
+        response =
+            await _dio.post<String>(path, data: FormData.fromMap(formFields));
       }
       return Success<String>(response.data ?? '');
     } on DioException catch (e) {

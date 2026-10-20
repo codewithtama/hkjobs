@@ -69,9 +69,20 @@ class PlacementScheduleItem {
   final String date;
 
   factory PlacementScheduleItem.fromDataTableRow(Map<String, Object?> row) {
+    final rawId = row['DT_RowId'];
+    final idFromPath = HtmlCellParser.extractTrailingPathId(row['1']);
+    final idFromFunc = HtmlCellParser.extractFirstFunctionArg(
+      row['6'],
+      'editPenempatanschedule',
+    );
+    final fallbackId = (rawId ?? idFromPath ?? idFromFunc ?? '').toString();
+
+    final code = HtmlCellParser.stripHtml(row['1']);
+    final cleanCode = code.isNotEmpty && code != '-' ? code : 'PENEMPATAN_$fallbackId';
+
     return PlacementScheduleItem(
-      id: (row['DT_RowId'] ?? '').toString(),
-      code: HtmlCellParser.stripHtml(row['1']),
+      id: fallbackId,
+      code: cleanCode,
       projectName: HtmlCellParser.stripHtml(row['2']),
       quota: HtmlCellParser.stripHtml(row['3']),
       positionName: HtmlCellParser.stripHtml(row['4']),

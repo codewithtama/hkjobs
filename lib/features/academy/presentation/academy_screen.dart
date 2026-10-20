@@ -178,7 +178,10 @@ class _AcademyScreenState extends ConsumerState<AcademyScreen> {
                     return ChoiceChip(
                       label: Text(tab.label),
                       selected: tab == activeTab,
-                      onSelected: (_) => controller.selectTab(tab),
+                      onSelected: (_) {
+                        _searchController.clear();
+                        controller.selectTab(tab);
+                      },
                     );
                   },
                 ),

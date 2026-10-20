@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:hkjobs_mobile/core/utils/html_cell_parser.dart';
 import 'package:hkjobs_mobile/core/widgets/hk_form_widgets.dart';
 import 'package:hkjobs_mobile/features/academy/domain/academy_models.dart';
 import 'package:hkjobs_mobile/features/interview/domain/interview_models.dart';
@@ -169,5 +170,35 @@ void main() {
     expect(vacancy.pdfReportUrl, contains('/advertisement/pdf/105'));
     expect(vacancy.applicantCount, 175);
     expect(vacancy.qrCodeUrl, contains('ADVERT-105.png'));
+  });
+
+  test('PlacementScheduleItem parses listTable13 production row with html link', () {
+    final row = <String, Object?>{
+      'DT_RowId': '212',
+      '0': 1,
+      '1': '<div class="btn-group" role="group" aria-label="Action">\r\n'
+          '<a href="https://ops.hk-indonesia.id/hkjobs/pakelarin/detailpenempatan/212">PENEMPATAN_212</a>\r\n'
+          '</div>',
+      '2': 'CIREBON SUPER BLOK',
+      '3': '1',
+      '4': 'OPERATOR - CLEANING SERVICE',
+      '5': '21-10-2026',
+      '6': '<button onclick="editPenempatanschedule(212)"></button>',
+    };
+    final item = PlacementScheduleItem.fromDataTableRow(row);
+    expect(item.id, '212');
+    expect(item.code, 'PENEMPATAN_212');
+    expect(item.projectName, 'CIREBON SUPER BLOK');
+    expect(item.quota, '1');
+    expect(item.positionName, 'OPERATOR - CLEANING SERVICE');
+    expect(item.date, '21-10-2026');
+  });
+
+  test('HtmlCellParser parses list-based row payload cleanly', () {
+    const raw = '{"recordsTotal":1,"recordsFiltered":1,"data":[["1","PENEMPATAN_100","SAFFRON"]]}';
+    final parsed = HtmlCellParser.parseDataTablePayload(raw);
+    expect(parsed.totalRecords, 1);
+    expect(parsed.rows.length, 1);
+    expect(parsed.rows.first['1'], 'PENEMPATAN_100');
   });
 }
