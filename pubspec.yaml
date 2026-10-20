@@ -1,7 +1,7 @@
 name: hkjobs_mobile
 description: Aplikasi Mobile Backoffice & Operasional Internal HKJobs & HK Academy (Hygiene Kleen).
 publish_to: 'none'
-version: 1.0.0+1
+version: 1.0.1+2
 
 environment:
   sdk: ^3.11.0
