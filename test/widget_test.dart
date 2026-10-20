@@ -135,7 +135,26 @@ void main() {
     expect(item.positionName, 'OPERATOR');
     expect(item.projectName, 'PROJECT MALL KOTA KASABLANKA');
     expect(item.status, 'Waiting Approval');
-    expect(item.suratTugasDownloadUrl, '/surat-tugas/88.pdf');
+    expect(
+      item.suratTugasDownloadUrl,
+      'https://ops.hk-indonesia.id/surat-tugas/88.pdf',
+    );
+    expect(item.isAccepted, false);
+    expect(item.isWaitingApproval, true);
+
+    final acceptedRow = <String, Object?>{
+      'DT_RowId': 'wait_89',
+      '1': 'IBNU ARIANTO',
+      '2': 'OPERATOR',
+      '4': 'CIREBON SUPER BLOK',
+      '5': '<a href="https://ops.hk-indonesia.id/hkjobs/pakelarin/suratTugas/409">Unduh</a>',
+      '7': '<a href="https://ops.hk-indonesia.id/assetshkjobs/surat_tugas/ST-6460_409.pdf">ST-6460_409.pdf</a>',
+      '8': '<label class="badge badge-success">Diterima</label>',
+    };
+    final acceptedItem = PlacementPersonnelItem.fromDataTableRow(acceptedRow);
+    expect(acceptedItem.isAccepted, true);
+    expect(acceptedItem.isWaitingApproval, false);
+    expect(acceptedItem.suratTugasPdfUrl, 'https://ops.hk-indonesia.id/assetshkjobs/surat_tugas/ST-6460_409.pdf');
   });
 
   test('PlacementDraft formats FormData map to match backend contract', () {

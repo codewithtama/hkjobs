@@ -86,6 +86,9 @@ abstract final class ApiEndpoints {
   static const String placementScheduleForm =
       'pakelarin/createpenempatanschedule';
   static const String placementAssignCandidate = 'pakelarin/updatePenempatan';
+  static const String placementUpdateSuratTugas = 'pakelarin/updateSuratTugas';
+  static String placementSuratTugasDownload(String id) =>
+      'pakelarin/suratTugas/$id';
   static const String placementBypassToOps =
       'pakelarin/updateByPasstoOpsBySigit';
   static String placementDetailJson(String id) =>

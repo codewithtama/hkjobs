@@ -113,17 +113,39 @@ class PlacementPersonnelItem {
   final String status;
   final String reason;
 
+  bool get isAccepted =>
+      status.toLowerCase().contains('terima') ||
+      status.toLowerCase().contains('accepted');
+
+  bool get isWaitingApproval =>
+      status.toLowerCase().contains('wait') ||
+      status.toLowerCase().contains('menunggu');
+
   factory PlacementPersonnelItem.fromDataTableRow(Map<String, Object?> row) {
+    final rawId = (row['DT_RowId'] ?? '').toString();
     final downloadHrefs = HtmlCellParser.extractHrefs(row['5']);
     final pdfHrefs = HtmlCellParser.extractHrefs(row['7']);
 
+    String downloadUrl = downloadHrefs.isNotEmpty ? downloadHrefs.first : '';
+    if (downloadUrl.isEmpty && rawId.isNotEmpty) {
+      downloadUrl =
+          'https://ops.hk-indonesia.id/hkjobs/pakelarin/suratTugas/$rawId';
+    } else if (downloadUrl.startsWith('/')) {
+      downloadUrl = 'https://ops.hk-indonesia.id$downloadUrl';
+    }
+
+    String pdfUrl = pdfHrefs.isNotEmpty ? pdfHrefs.first : '';
+    if (pdfUrl.startsWith('/')) {
+      pdfUrl = 'https://ops.hk-indonesia.id$pdfUrl';
+    }
+
     return PlacementPersonnelItem(
-      id: (row['DT_RowId'] ?? '').toString(),
+      id: rawId,
       candidateName: HtmlCellParser.stripHtml(row['1']),
       positionName: HtmlCellParser.stripHtml(row['2']),
       projectName: HtmlCellParser.stripHtml(row['4']),
-      suratTugasDownloadUrl: downloadHrefs.isNotEmpty ? downloadHrefs.first : '',
-      suratTugasPdfUrl: pdfHrefs.isNotEmpty ? pdfHrefs.first : '',
+      suratTugasDownloadUrl: downloadUrl,
+      suratTugasPdfUrl: pdfUrl,
       status: HtmlCellParser.stripHtml(row['8']),
       reason: HtmlCellParser.stripHtml(row['9']),
     );
