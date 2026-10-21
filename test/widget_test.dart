@@ -5,6 +5,7 @@ import 'package:hkjobs_mobile/features/academy/domain/academy_models.dart';
 import 'package:hkjobs_mobile/features/interview/domain/interview_models.dart';
 import 'package:hkjobs_mobile/features/management/data/management_repository.dart';
 import 'package:hkjobs_mobile/core/utils/whatsapp_launcher.dart';
+import 'package:hkjobs_mobile/core/widgets/hk_filter_sheet.dart';
 import 'package:hkjobs_mobile/features/recruitment/data/recruitment_repository.dart';
 import 'package:hkjobs_mobile/features/recruitment/domain/recruitment_models.dart';
 
@@ -376,5 +377,44 @@ void main() {
     expect(uri.host, 'wa.me');
     expect(uri.path, '/6289503091346');
     expect(uri.queryParameters['text'], 'Halo ADE SUPENDI');
+  });
+
+  test('HkFilterData calculates activeCount and formats dates correctly', () {
+    const empty = HkFilterData.empty;
+    expect(empty.activeCount, 0);
+
+    final filter = HkFilterData(
+      branchId: 'HK02',
+      startDate: DateTime(2026, 10, 1),
+      endDate: DateTime(2026, 10, 31),
+      vacancyCode: 'HK02_CSO_OKTOBER_2026',
+      interviewCode: 'INT-202610-001',
+      projectLocation: 'RS MITRA MEDIKA PONTIANAK',
+      positionName: 'OPERATOR - CLEANING SERVICE',
+      experienceFilter: 'Ada',
+      city: 'JAKARTA BARAT',
+      gender: 'Laki-laki',
+    );
+
+    expect(filter.activeCount, 10);
+    expect(filter.startDateFormatted, '2026-10-01');
+    expect(filter.endDateFormatted, '2026-10-31');
+
+    final cleared = filter.copyWith(
+      projectLocation: () => null,
+      positionName: () => null,
+    );
+    expect(cleared.activeCount, 8);
+    expect(cleared.projectLocation, isNull);
+    expect(cleared.positionName, isNull);
+  });
+
+  test('HkFilterMasterData contains complete lists for placement, positions, and vacancies', () {
+    expect(HkFilterMasterData.defaultPlacements.length, greaterThanOrEqualTo(20));
+    expect(HkFilterMasterData.defaultPlacements, contains('RS MITRA MEDIKA PONTIANAK'));
+    expect(HkFilterMasterData.defaultPlacements, contains('MENARA JAMSOSTEK'));
+    expect(HkFilterMasterData.defaultPositions.length, greaterThanOrEqualTo(15));
+    expect(HkFilterMasterData.defaultPositions, contains('OPERATOR - CLEANING SERVICE'));
+    expect(HkFilterMasterData.defaultVacancies.length, greaterThanOrEqualTo(30));
   });
 }

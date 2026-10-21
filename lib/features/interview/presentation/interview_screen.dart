@@ -31,13 +31,18 @@ class _InterviewScreenState extends ConsumerState<InterviewScreen> {
 
   Future<void> _openFilterSheet(InterviewViewState? viewState) async {
     if (viewState == null) return;
-    final activeTab = viewState.activeTab;
     final result = await showHkFilterBottomSheet(
       context: context,
       initial: viewState.filterData,
-      showBranch: activeTab == InterviewSubTab.schedules,
-      showDateRange: activeTab == InterviewSubTab.schedules,
+      showBranch: true,
+      showDateRange: true,
       showExperience: false,
+      showVacancy: true,
+      showInterview: true,
+      showPlacement: false,
+      showPosition: true,
+      showCity: true,
+      showGender: true,
       availableInterviews: viewState.availableInterviewCodes,
       availableVacancies: viewState.availableVacancyCodes,
       availableCities: viewState.availableCities,
@@ -247,7 +252,7 @@ class _InterviewScreenState extends ConsumerState<InterviewScreen> {
                       .read(interviewControllerProvider.notifier)
                       .refresh(),
                   child: viewState.activeTab == InterviewSubTab.schedules
-                      ? _buildScheduleList(viewState.schedules)
+                      ? _buildScheduleList(viewState.filteredSchedules)
                       : _buildCandidateList(viewState),
                 );
               },

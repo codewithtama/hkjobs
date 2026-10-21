@@ -55,6 +55,31 @@ class InterviewViewState {
       ? 1
       : ((totalCount + pageSize - 1) ~/ pageSize);
 
+  List<InterviewScheduleItem> get filteredSchedules {
+    return schedules.where((s) {
+      if (filterData.interviewCode != null &&
+          filterData.interviewCode!.isNotEmpty) {
+        if (!s.code.toLowerCase().contains(filterData.interviewCode!.toLowerCase())) {
+          return false;
+        }
+      }
+      if (filterData.vacancyCode != null &&
+          filterData.vacancyCode!.isNotEmpty) {
+        if (!s.vacancyCode.toLowerCase().contains(filterData.vacancyCode!.toLowerCase())) {
+          return false;
+        }
+      }
+      if (filterData.positionName != null &&
+          filterData.positionName!.isNotEmpty) {
+        final pos = filterData.positionName!.toLowerCase();
+        if (!s.vacancyCode.toLowerCase().contains(pos)) {
+          return false;
+        }
+      }
+      return true;
+    }).toList();
+  }
+
   List<InterviewCandidateItem> get filteredCandidates {
     return candidates.where((c) {
       if (filterData.interviewCode != null &&
@@ -65,8 +90,21 @@ class InterviewViewState {
           filterData.vacancyCode!.isNotEmpty) {
         if (c.vacancyCode != filterData.vacancyCode) return false;
       }
+      if (filterData.positionName != null &&
+          filterData.positionName!.isNotEmpty) {
+        final pos = filterData.positionName!.toLowerCase();
+        if (!c.vacancyCode.toLowerCase().contains(pos) &&
+            !c.reason.toLowerCase().contains(pos)) {
+          return false;
+        }
+      }
       if (filterData.city != null && filterData.city!.isNotEmpty) {
         if (!c.city.toLowerCase().contains(filterData.city!.toLowerCase())) {
+          return false;
+        }
+      }
+      if (filterData.gender != null && filterData.gender!.isNotEmpty) {
+        if (!c.birthInfo.toLowerCase().contains(filterData.gender!.toLowerCase())) {
           return false;
         }
       }

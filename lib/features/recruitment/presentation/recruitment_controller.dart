@@ -56,11 +56,39 @@ class RecruitmentViewState {
       ? 1
       : ((totalCount + pageSize - 1) ~/ pageSize);
 
+  List<JobVacancyItem> get filteredVacancies {
+    return vacancies.where((v) {
+      if (filterData.vacancyCode != null &&
+          filterData.vacancyCode!.isNotEmpty) {
+        if (!v.code.toLowerCase().contains(filterData.vacancyCode!.toLowerCase())) {
+          return false;
+        }
+      }
+      if (filterData.positionName != null &&
+          filterData.positionName!.isNotEmpty) {
+        final pos = filterData.positionName!.toLowerCase();
+        if (!v.code.toLowerCase().contains(pos) &&
+            !v.applicantSummary.toLowerCase().contains(pos)) {
+          return false;
+        }
+      }
+      return true;
+    }).toList();
+  }
+
   List<VacancyApplicationItem> get filteredApplications {
     return applications.where((a) {
       if (filterData.vacancyCode != null &&
           filterData.vacancyCode!.isNotEmpty) {
         if (a.vacancyCode != filterData.vacancyCode) return false;
+      }
+      if (filterData.positionName != null &&
+          filterData.positionName!.isNotEmpty) {
+        final pos = filterData.positionName!.toLowerCase();
+        if (!a.lastPosition.toLowerCase().contains(pos) &&
+            !a.vacancyCode.toLowerCase().contains(pos)) {
+          return false;
+        }
       }
       if (filterData.city != null && filterData.city!.isNotEmpty) {
         if (!a.city.toLowerCase().contains(filterData.city!.toLowerCase())) {
@@ -71,6 +99,20 @@ class RecruitmentViewState {
         if (!a.gender.toLowerCase().contains(
           filterData.gender!.toLowerCase(),
         )) {
+          return false;
+        }
+      }
+      return true;
+    }).toList();
+  }
+
+  List<MasterApplicantItem> get filteredMasterApplicants {
+    return masterApplicants.where((m) {
+      if (filterData.positionName != null &&
+          filterData.positionName!.isNotEmpty) {
+        final pos = filterData.positionName!.toLowerCase();
+        if (!m.fullName.toLowerCase().contains(pos) &&
+            !m.experienceOrDate.toLowerCase().contains(pos)) {
           return false;
         }
       }

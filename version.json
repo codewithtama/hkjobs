@@ -1,9 +1,9 @@
 {
-  "version": "1.0.4",
-  "buildNumber": "8",
-  "title": "Rilis v1.0.4 (Build 8)",
-  "releaseNotes": "Pembaruan rilis otomatis v1.0.4",
-  "apkUrl": "https://github.com/codewithtama/hkjobs/releases/download/v1.0.4/hkjobs-release.apk",
-  "htmlUrl": "https://github.com/codewithtama/hkjobs/releases/tag/v1.0.4",
-  "publishedAt": "2026-10-21T07:33:46Z"
+  "version": "1.0.5",
+  "buildNumber": "10",
+  "title": "Rilis v1.0.5 (Build 10)",
+  "releaseNotes": "Fitur Filter Lengkap: Pencarian dan filter komprehensif untuk Lowongan Kerja (100+ opsi), Jadwal Interview, Penempatan/Lokasi Proyek (23 lokasi), Posisi Pekerjaan (23 posisi), Cabang, Periode Tanggal, dan Status Pengalaman di seluruh modul Rekrutmen, Interview, dan Academy/Penempatan.",
+  "apkUrl": "https://github.com/codewithtama/hkjobs/releases/download/v1.0.5/hkjobs-release.apk",
+  "htmlUrl": "https://github.com/codewithtama/hkjobs/releases/tag/v1.0.5",
+  "publishedAt": "2026-10-21T07:50:00Z"
 }

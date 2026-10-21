@@ -32,15 +32,18 @@ class _RecruitmentScreenState extends ConsumerState<RecruitmentScreen> {
 
   Future<void> _openFilterSheet(RecruitmentViewState? viewState) async {
     if (viewState == null) return;
-    final activeTab = viewState.activeTab;
     final result = await showHkFilterBottomSheet(
       context: context,
       initial: viewState.filterData,
-      showBranch: activeTab == RecruitmentSubTab.vacancies,
-      showDateRange: activeTab == RecruitmentSubTab.vacancies,
-      showExperience:
-          activeTab == RecruitmentSubTab.newComers ||
-          activeTab == RecruitmentSubTab.existing,
+      showBranch: true,
+      showDateRange: true,
+      showExperience: true,
+      showVacancy: true,
+      showInterview: false,
+      showPlacement: false,
+      showPosition: true,
+      showCity: true,
+      showGender: true,
       availableVacancies: viewState.availableVacancyCodes,
       availableCities: viewState.availableCities,
       availableGenders: viewState.availableGenders,
@@ -264,12 +267,13 @@ class _RecruitmentScreenState extends ConsumerState<RecruitmentScreen> {
   Widget _buildListContent(RecruitmentViewState viewState) {
     switch (viewState.activeTab) {
       case RecruitmentSubTab.vacancies:
-        if (viewState.vacancies.isEmpty) return const HkEmptyView();
+        final vacancies = viewState.filteredVacancies;
+        if (vacancies.isEmpty) return const HkEmptyView();
         return ListView.builder(
           padding: const EdgeInsets.fromLTRB(16, 16, 16, 80),
-          itemCount: viewState.vacancies.length,
+          itemCount: vacancies.length,
           itemBuilder: (context, index) {
-            final item = viewState.vacancies[index];
+            final item = vacancies[index];
             return Padding(
               padding: const EdgeInsets.only(bottom: 12),
               child: _VacancyCard(
@@ -310,7 +314,7 @@ class _RecruitmentScreenState extends ConsumerState<RecruitmentScreen> {
                   ...apps.map(
                     (item) => Padding(
                       padding: const EdgeInsets.only(bottom: 10),
-                      child: _ApplicationCard(
+                       child: _ApplicationCard(
                         item: item,
                         onInspectProfile: () => _openApplicantDetailSheet(
                           item.applicantId,
@@ -331,12 +335,13 @@ class _RecruitmentScreenState extends ConsumerState<RecruitmentScreen> {
 
       case RecruitmentSubTab.newComers:
       case RecruitmentSubTab.existing:
-        if (viewState.masterApplicants.isEmpty) return const HkEmptyView();
+        final applicants = viewState.filteredMasterApplicants;
+        if (applicants.isEmpty) return const HkEmptyView();
         return ListView.builder(
           padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
-          itemCount: viewState.masterApplicants.length,
+          itemCount: applicants.length,
           itemBuilder: (context, index) {
-            final item = viewState.masterApplicants[index];
+            final item = applicants[index];
             return Padding(
               padding: const EdgeInsets.only(bottom: 12),
               child: _MasterApplicantCard(

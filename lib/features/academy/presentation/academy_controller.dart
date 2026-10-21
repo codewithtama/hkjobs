@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/errors/app_failure.dart';
+import '../../../core/widgets/hk_filter_sheet.dart';
 import '../data/academy_repository.dart';
 import '../domain/academy_models.dart';
 
@@ -19,6 +20,7 @@ class AcademyViewState {
     this.psikotesQuestions = const <PsikotesQuestionItem>[],
     this.trainingRecords = const <TrainingOfflineRecord>[],
     this.fieldManagers = const <FieldManagerItem>[],
+    this.filterData = HkFilterData.empty,
   });
 
   final AcademySubTab activeTab;
@@ -32,10 +34,108 @@ class AcademyViewState {
   final List<PsikotesQuestionItem> psikotesQuestions;
   final List<TrainingOfflineRecord> trainingRecords;
   final List<FieldManagerItem> fieldManagers;
+  final HkFilterData filterData;
 
   int get totalPages => (totalCount <= 0 || pageSize <= 0)
       ? 1
       : ((totalCount + pageSize - 1) ~/ pageSize);
+
+  List<PlacementWaitingItem> get filteredWaitingPlacements {
+    return waitingPlacements.where((w) {
+      if (filterData.positionName != null &&
+          filterData.positionName!.isNotEmpty) {
+        if (!w.positionName
+            .toLowerCase()
+            .contains(filterData.positionName!.toLowerCase())) {
+          return false;
+        }
+      }
+      if (filterData.city != null && filterData.city!.isNotEmpty) {
+        if (!w.city.toLowerCase().contains(filterData.city!.toLowerCase())) {
+          return false;
+        }
+      }
+      if (filterData.startDate != null) {
+        final parsed = DateTime.tryParse(w.passedDate);
+        if (parsed != null && parsed.isBefore(filterData.startDate!)) {
+          return false;
+        }
+      }
+      if (filterData.endDate != null) {
+        final parsed = DateTime.tryParse(w.passedDate);
+        if (parsed != null &&
+            parsed.isAfter(filterData.endDate!.add(const Duration(days: 1)))) {
+          return false;
+        }
+      }
+      return true;
+    }).toList();
+  }
+
+  List<PlacementScheduleItem> get filteredPlacementSchedules {
+    return placementSchedules.where((s) {
+      if (filterData.projectLocation != null &&
+          filterData.projectLocation!.isNotEmpty) {
+        if (!s.projectName
+            .toLowerCase()
+            .contains(filterData.projectLocation!.toLowerCase())) {
+          return false;
+        }
+      }
+      if (filterData.positionName != null &&
+          filterData.positionName!.isNotEmpty) {
+        if (!s.positionName
+            .toLowerCase()
+            .contains(filterData.positionName!.toLowerCase())) {
+          return false;
+        }
+      }
+      if (filterData.startDate != null) {
+        final parsed = DateTime.tryParse(s.date);
+        if (parsed != null && parsed.isBefore(filterData.startDate!)) {
+          return false;
+        }
+      }
+      if (filterData.endDate != null) {
+        final parsed = DateTime.tryParse(s.date);
+        if (parsed != null &&
+            parsed.isAfter(filterData.endDate!.add(const Duration(days: 1)))) {
+          return false;
+        }
+      }
+      return true;
+    }).toList();
+  }
+
+  AcademyViewState copyWith({
+    AcademySubTab? activeTab,
+    String? searchQuery,
+    int? totalCount,
+    int? page,
+    int? pageSize,
+    List<PlacementWaitingItem>? waitingPlacements,
+    List<PlacementScheduleItem>? placementSchedules,
+    List<AcademyAccountItem>? academyAccounts,
+    List<PsikotesQuestionItem>? psikotesQuestions,
+    List<TrainingOfflineRecord>? trainingRecords,
+    List<FieldManagerItem>? fieldManagers,
+    HkFilterData? filterData,
+  }) {
+    return AcademyViewState(
+      activeTab: activeTab ?? this.activeTab,
+      searchQuery: searchQuery ?? this.searchQuery,
+      totalCount: totalCount ?? this.totalCount,
+      page: page ?? this.page,
+      pageSize: pageSize ?? this.pageSize,
+      waitingPlacements: waitingPlacements ?? this.waitingPlacements,
+      placementSchedules: placementSchedules ?? this.placementSchedules,
+      academyAccounts: academyAccounts ?? this.academyAccounts,
+      psikotesQuestions: psikotesQuestions ?? this.psikotesQuestions,
+      trainingRecords: trainingRecords ?? this.trainingRecords,
+      fieldManagers: fieldManagers ?? this.fieldManagers,
+      filterData: filterData ?? this.filterData,
+    );
+  }
 }
 
 final academyControllerProvider =
@@ -46,6 +146,7 @@ final academyControllerProvider =
 class AcademyController extends AsyncNotifier<AcademyViewState> {
   AcademySubTab _activeTab = AcademySubTab.placementWaiting;
   String _searchQuery = '';
+  HkFilterData _filterData = HkFilterData.empty;
   int _page = 1;
   static const int _pageSize = 20;
 
@@ -73,6 +174,7 @@ class AcademyController extends AsyncNotifier<AcademyViewState> {
               page: _page,
               pageSize: _pageSize,
               waitingPlacements: data.items,
+              filterData: _filterData,
             );
           case Failure<PaginatedList<PlacementWaitingItem>>(:final error):
             throw error;
@@ -93,6 +195,7 @@ class AcademyController extends AsyncNotifier<AcademyViewState> {
               page: _page,
               pageSize: _pageSize,
               placementSchedules: data.items,
+              filterData: _filterData,
             );
           case Failure<PaginatedList<PlacementScheduleItem>>(:final error):
             throw error;
@@ -113,6 +216,7 @@ class AcademyController extends AsyncNotifier<AcademyViewState> {
               page: _page,
               pageSize: _pageSize,
               academyAccounts: data.items,
+              filterData: _filterData,
             );
           case Failure<PaginatedList<AcademyAccountItem>>(:final error):
             throw error;
@@ -133,6 +237,7 @@ class AcademyController extends AsyncNotifier<AcademyViewState> {
               page: _page,
               pageSize: _pageSize,
               psikotesQuestions: data.items,
+              filterData: _filterData,
             );
           case Failure<PaginatedList<PsikotesQuestionItem>>(:final error):
             throw error;
@@ -153,6 +258,7 @@ class AcademyController extends AsyncNotifier<AcademyViewState> {
               page: _page,
               pageSize: _pageSize,
               trainingRecords: data.items,
+              filterData: _filterData,
             );
           case Failure<PaginatedList<TrainingOfflineRecord>>(:final error):
             throw error;
@@ -173,10 +279,19 @@ class AcademyController extends AsyncNotifier<AcademyViewState> {
               page: _page,
               pageSize: _pageSize,
               fieldManagers: data.items,
+              filterData: _filterData,
             );
           case Failure<PaginatedList<FieldManagerItem>>(:final error):
             throw error;
         }
+    }
+  }
+
+  Future<void> updateFilter(HkFilterData filter) async {
+    _filterData = filter;
+    final current = state.valueOrNull;
+    if (current != null) {
+      state = AsyncData(current.copyWith(filterData: filter));
     }
   }
 
@@ -185,6 +300,7 @@ class AcademyController extends AsyncNotifier<AcademyViewState> {
     _activeTab = tab;
     _page = 1;
     _searchQuery = '';
+    _filterData = HkFilterData.empty;
     state = const AsyncLoading<AcademyViewState>();
     state = await AsyncValue.guard(_fetchCurrent);
   }

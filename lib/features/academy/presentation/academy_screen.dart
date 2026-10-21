@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/constants/app_strings.dart';
 import '../../../core/errors/app_failure.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/widgets/hk_filter_sheet.dart';
 import '../../../core/widgets/hk_pagination_bar.dart';
 import '../../../core/widgets/hk_state_views.dart';
 import '../../../core/widgets/hk_whatsapp_button.dart';
@@ -46,10 +47,32 @@ class _AcademyScreenState extends ConsumerState<AcademyScreen> {
     super.dispose();
   }
 
+  Future<void> _openFilterSheet(AcademyViewState? viewState) async {
+    if (viewState == null) return;
+    final result = await showHkFilterBottomSheet(
+      context: context,
+      initial: viewState.filterData,
+      showBranch: true,
+      showDateRange: true,
+      showExperience: false,
+      showVacancy: false,
+      showInterview: false,
+      showPlacement: true,
+      showPosition: true,
+      showCity: true,
+      showGender: false,
+      availablePlacements: HkFilterMasterData.defaultPlacements,
+      availablePositions: HkFilterMasterData.defaultPositions,
+    );
+    if (result != null) {
+      await ref.read(academyControllerProvider.notifier).updateFilter(result);
+    }
+  }
+
   List<_RowData> _rows(AcademyViewState s, AcademyController controller) {
     switch (s.activeTab) {
       case AcademySubTab.placementWaiting:
-        return s.waitingPlacements
+        return s.filteredWaitingPlacements
             .map(
               (e) => _RowData(
                 title: e.applicantName,
@@ -78,7 +101,7 @@ class _AcademyScreenState extends ConsumerState<AcademyScreen> {
             )
             .toList();
       case AcademySubTab.placementSchedules:
-        return s.placementSchedules
+        return s.filteredPlacementSchedules
             .map(
               (e) => _RowData(
                 title: e.code,
@@ -215,14 +238,31 @@ class _AcademyScreenState extends ConsumerState<AcademyScreen> {
                   ),
                 ),
                 const SizedBox(height: 10),
-                HkSearchField(
-                  controller: _searchController,
-                  onSubmitted: controller.updateSearch,
-                  onClear: () {
-                    _searchController.clear();
-                    controller.updateSearch('');
-                  },
+                Row(
+                  children: [
+                    Expanded(
+                      child: HkSearchField(
+                        controller: _searchController,
+                        hintText: 'Cari penempatan, nama, atau posisi...',
+                        onSubmitted: controller.updateSearch,
+                        onClear: () {
+                          _searchController.clear();
+                          controller.updateSearch('');
+                        },
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    HkFilterByButton(
+                      count: viewState?.filterData.activeCount ?? 0,
+                      onPressed: () => _openFilterSheet(viewState),
+                    ),
+                  ],
                 ),
+                if (viewState != null)
+                  HkActiveFilterChips(
+                    filterData: viewState.filterData,
+                    onFilterChanged: controller.updateFilter,
+                  ),
               ],
             ),
           ),
