@@ -34,7 +34,8 @@ abstract final class AppStrings {
   static const String filterDateRange = 'Filter rentang tanggal';
   static const String resetFilter = 'Reset semua periode';
   static const String sectionVacancyFunnel = 'Status pelamar lowongan kerja';
-  static const String sectionInterviewFunnel = 'Pipeline jadwal & hasil interview';
+  static const String sectionInterviewFunnel =
+      'Pipeline jadwal & hasil interview';
   static const String sectionApplicantPool = 'Populasi kandidat aktif';
   static const String sectionRegionalBranches = 'Kantor cabang operasional';
   static const String statusApproved = 'Diterima';
@@ -56,11 +57,13 @@ abstract final class AppStrings {
   static const String tabRejected = 'Ditolak';
   static const String tabNewComers = 'Pelamar baru';
   static const String tabExisting = 'Pelamar eksisting';
-  static const String loadingVacancies = 'Memuat daftar lowongan kerja aktif...';
+  static const String loadingVacancies =
+      'Memuat daftar lowongan kerja aktif...';
   static const String loadingApplicants = 'Memuat data kandidat & dokumen...';
   static const String loadingApplicantDetail =
       'Memuat biodata lengkap & berkas dokumen pelamar...';
-  static const String searchPlaceholder = 'Cari kode, nama pelamar, atau kota...';
+  static const String searchPlaceholder =
+      'Cari kode, nama pelamar, atau kota...';
   static const String emptyListTitle = 'Belum ada data ditemukan';
   static const String emptyListSubtitle =
       'Coba ubah kata kunci pencarian atau muat ulang halaman ini.';

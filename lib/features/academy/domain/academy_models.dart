@@ -78,7 +78,9 @@ class PlacementScheduleItem {
     final fallbackId = (rawId ?? idFromPath ?? idFromFunc ?? '').toString();
 
     final code = HtmlCellParser.stripHtml(row['1']);
-    final cleanCode = code.isNotEmpty && code != '-' ? code : 'PENEMPATAN_$fallbackId';
+    final cleanCode = code.isNotEmpty && code != '-'
+        ? code
+        : 'PENEMPATAN_$fallbackId';
 
     return PlacementScheduleItem(
       id: fallbackId,
@@ -267,7 +269,9 @@ class TrainingScheduleSummaryItem {
   final String time;
   final String createdAt;
 
-  factory TrainingScheduleSummaryItem.fromDataTableRow(Map<String, Object?> row) {
+  factory TrainingScheduleSummaryItem.fromDataTableRow(
+    Map<String, Object?> row,
+  ) {
     return TrainingScheduleSummaryItem(
       id: (row['DT_RowId'] ?? '').toString(),
       code: HtmlCellParser.stripHtml(row['1']),

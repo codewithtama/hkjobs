@@ -10,15 +10,15 @@ import '../domain/academy_models.dart';
 
 final trainingParticipantsProvider = FutureProvider.autoDispose
     .family<List<TrainingParticipantItem>, String>((ref, trainingId) async {
-  final repo = ref.watch(academyRepositoryProvider);
-  final res = await repo.fetchTrainingParticipants(trainingId);
-  switch (res) {
-    case Success<PaginatedList<TrainingParticipantItem>>(:final data):
-      return data.items;
-    case Failure<PaginatedList<TrainingParticipantItem>>(:final error):
-      throw error;
-  }
-});
+      final repo = ref.watch(academyRepositoryProvider);
+      final res = await repo.fetchTrainingParticipants(trainingId);
+      switch (res) {
+        case Success<PaginatedList<TrainingParticipantItem>>(:final data):
+          return data.items;
+        case Failure<PaginatedList<TrainingParticipantItem>>(:final error):
+          throw error;
+      }
+    });
 
 class TrainingParticipantsScreen extends ConsumerStatefulWidget {
   const TrainingParticipantsScreen({
@@ -103,10 +103,7 @@ class _TrainingParticipantsScreenState
               ),
               const SizedBox(width: 8),
               Expanded(
-                child: Text(
-                  title,
-                  style: dialogContext.textStyles.titleMedium,
-                ),
+                child: Text(title, style: dialogContext.textStyles.titleMedium),
               ),
             ],
           ),
@@ -192,9 +189,11 @@ class _TrainingParticipantsScreenState
       case Success<void>():
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(isPassed
-                ? 'Peserta berhasil diloloskan.'
-                : 'Status peserta diperbarui menjadi tidak lolos.'),
+            content: Text(
+              isPassed
+                  ? 'Peserta berhasil diloloskan.'
+                  : 'Status peserta diperbarui menjadi tidak lolos.',
+            ),
             backgroundColor: context.colors.accent,
           ),
         );
@@ -204,15 +203,18 @@ class _TrainingParticipantsScreenState
 
   @override
   Widget build(BuildContext context) {
-    final participantsAsync =
-        ref.watch(trainingParticipantsProvider(widget.trainingId));
+    final participantsAsync = ref.watch(
+      trainingParticipantsProvider(widget.trainingId),
+    );
     final colors = context.colors;
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.trainingCode != null
-            ? '${FormStrings.participantsTitle} (${widget.trainingCode})'
-            : FormStrings.participantsTitle),
+        title: Text(
+          widget.trainingCode != null
+              ? '${FormStrings.participantsTitle} (${widget.trainingCode})'
+              : FormStrings.participantsTitle,
+        ),
       ),
       body: Column(
         children: [
@@ -233,14 +235,14 @@ class _TrainingParticipantsScreenState
                       )
                     : null,
               ),
-              onChanged: (v) => setState(() => _search = v.trim().toLowerCase()),
+              onChanged: (v) =>
+                  setState(() => _search = v.trim().toLowerCase()),
             ),
           ),
           Expanded(
             child: participantsAsync.when(
-              loading: () => const HkLoadingView(
-                message: FormStrings.loadingParticipants,
-              ),
+              loading: () =>
+                  const HkLoadingView(message: FormStrings.loadingParticipants),
               error: (err, _) => HkErrorView(
                 message: err.toString(),
                 onRetry: () => ref.invalidate(
@@ -261,7 +263,10 @@ class _TrainingParticipantsScreenState
                 }
 
                 return ListView.separated(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8,
+                  ),
                   itemCount: filtered.length,
                   separatorBuilder: (_, _) => const SizedBox(height: 8),
                   itemBuilder: (context, index) {
@@ -278,20 +283,21 @@ class _TrainingParticipantsScreenState
                               children: [
                                 Expanded(
                                   child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Text(
                                         item.participantName,
-                                        style: context.textStyles.titleSmall?.copyWith(
-                                          fontWeight: FontWeight.w700,
-                                        ),
+                                        style: context.textStyles.titleSmall
+                                            ?.copyWith(
+                                              fontWeight: FontWeight.w700,
+                                            ),
                                       ),
                                       const SizedBox(height: 4),
                                       Text(
                                         'Jadwal: ${item.date} • ${item.trainerLocation}',
-                                        style: context.textStyles.bodySmall?.copyWith(
-                                          color: colors.textMuted,
-                                        ),
+                                        style: context.textStyles.bodySmall
+                                            ?.copyWith(color: colors.textMuted),
                                       ),
                                     ],
                                   ),
@@ -299,7 +305,8 @@ class _TrainingParticipantsScreenState
                                 HkStatusBadge.fromStatusText(item.status),
                               ],
                             ),
-                            if (item.reason.isNotEmpty && item.reason != '-') ...[
+                            if (item.reason.isNotEmpty &&
+                                item.reason != '-') ...[
                               const SizedBox(height: 8),
                               Container(
                                 padding: const EdgeInsets.all(8),
@@ -326,7 +333,10 @@ class _TrainingParticipantsScreenState
                                     participant: item,
                                     isPassed: false,
                                   ),
-                                  icon: const Icon(Icons.close_rounded, size: 16),
+                                  icon: const Icon(
+                                    Icons.close_rounded,
+                                    size: 16,
+                                  ),
                                   label: const Text(FormStrings.failAction),
                                 ),
                                 const SizedBox(width: 8),
@@ -338,7 +348,10 @@ class _TrainingParticipantsScreenState
                                     participant: item,
                                     isPassed: true,
                                   ),
-                                  icon: const Icon(Icons.check_rounded, size: 16),
+                                  icon: const Icon(
+                                    Icons.check_rounded,
+                                    size: 16,
+                                  ),
                                   label: const Text(FormStrings.passAction),
                                 ),
                               ],

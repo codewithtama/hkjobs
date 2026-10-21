@@ -53,8 +53,9 @@ final routerProvider = Provider<GoRouter>((ref) {
     routes: [
       GoRoute(
         path: '/splash',
-        builder: (_, _) =>
-            const Scaffold(body: HkLoadingView(message: AppStrings.signingInMessage)),
+        builder: (_, _) => const Scaffold(
+          body: HkLoadingView(message: AppStrings.signingInMessage),
+        ),
       ),
       GoRoute(path: '/login', builder: (_, _) => const LoginScreen()),
       GoRoute(
@@ -77,10 +78,7 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/organization',
         builder: (_, _) => const _Shell(tab: 4, child: OrganizationScreen()),
       ),
-      GoRoute(
-        path: '/scanner',
-        builder: (_, _) => const QrScannerScreen(),
-      ),
+      GoRoute(path: '/scanner', builder: (_, _) => const QrScannerScreen()),
       GoRoute(
         path: '/management/create-admin',
         builder: (_, _) => const CreateAdminScreen(),
@@ -181,9 +179,7 @@ class _ShellState extends ConsumerState<_Shell> {
     } else {
       final err = ref.read(appUpdateControllerProvider).errorMessage;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(err ?? 'Gagal memeriksa pembaruan aplikasi.'),
-        ),
+        SnackBar(content: Text(err ?? 'Gagal memeriksa pembaruan aplikasi.')),
       );
     }
   }
@@ -205,10 +201,12 @@ class _ShellState extends ConsumerState<_Shell> {
     final updateState = ref.watch(appUpdateControllerProvider);
     final hasUpdate = updateState.info?.hasUpdate == true;
 
-    final isAdmin = session?.role == AdminRole.superAdmin ||
+    final isAdmin =
+        session?.role == AdminRole.superAdmin ||
         session?.role == AdminRole.supervisor;
 
-    final canScanQr = session?.role == AdminRole.interviewer ||
+    final canScanQr =
+        session?.role == AdminRole.interviewer ||
         session?.role == AdminRole.trainer;
 
     return Scaffold(
@@ -226,10 +224,8 @@ class _ShellState extends ConsumerState<_Shell> {
           ),
           if (hasUpdate)
             IconButton(
-              tooltip:
-                  'Pembaruan v${updateState.info!.latestVersion} Tersedia',
-              onPressed: () =>
-                  AppUpdateDialog.show(context, updateState.info!),
+              tooltip: 'Pembaruan v${updateState.info!.latestVersion} Tersedia',
+              onPressed: () => AppUpdateDialog.show(context, updateState.info!),
               icon: const Badge(
                 smallSize: 8,
                 child: Icon(

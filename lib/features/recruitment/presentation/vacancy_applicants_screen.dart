@@ -16,27 +16,31 @@ import 'widgets/review_application_dialog.dart';
 
 typedef VacancyApplicantsParams = ({
   String vacancyId,
+  String vacancyCode,
   int page,
   String searchQuery,
 });
 
 final vacancyApplicantsProvider = FutureProvider.autoDispose
-    .family<PaginatedList<VacancyApplicationItem>, VacancyApplicantsParams>(
-        (ref, params) async {
-  final repo = ref.watch(recruitmentRepositoryProvider);
-  final res = await repo.fetchVacancyApplicants(
-    params.vacancyId,
-    page: params.page,
-    limit: 20,
-    searchQuery: params.searchQuery,
-  );
-  switch (res) {
-    case Success<PaginatedList<VacancyApplicationItem>>(:final data):
-      return data;
-    case Failure<PaginatedList<VacancyApplicationItem>>(:final error):
-      throw error;
-  }
-});
+    .family<PaginatedList<VacancyApplicationItem>, VacancyApplicantsParams>((
+      ref,
+      params,
+    ) async {
+      final repo = ref.watch(recruitmentRepositoryProvider);
+      final res = await repo.fetchVacancyApplicants(
+        params.vacancyId,
+        vacancyCode: params.vacancyCode,
+        page: params.page,
+        limit: 20,
+        searchQuery: params.searchQuery,
+      );
+      switch (res) {
+        case Success<PaginatedList<VacancyApplicationItem>>(:final data):
+          return data;
+        case Failure<PaginatedList<VacancyApplicationItem>>(:final error):
+          throw error;
+      }
+    });
 
 class VacancyApplicantsScreen extends ConsumerStatefulWidget {
   const VacancyApplicantsScreen({
@@ -57,13 +61,15 @@ class _VacancyApplicantsScreenState
     extends ConsumerState<VacancyApplicantsScreen> {
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
+  String _statusFilter = 'Semua';
   int _page = 1;
 
   VacancyApplicantsParams get _params => (
-        vacancyId: widget.vacancyId,
-        page: _page,
-        searchQuery: _searchQuery,
-      );
+    vacancyId: widget.vacancyId,
+    vacancyCode: widget.vacancyCode ?? '',
+    page: _page,
+    searchQuery: _searchQuery,
+  );
 
   @override
   void dispose() {
@@ -143,20 +149,51 @@ class _VacancyApplicantsScreenState
           Container(
             color: context.colors.surfaceCard,
             padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
-            child: HkSearchField(
-              controller: _searchController,
-              hintText: 'Cari nama atau NIK pelamar...',
-              onSubmitted: (q) => setState(() {
-                _searchQuery = q.trim();
-                _page = 1;
-              }),
-              onClear: () {
-                _searchController.clear();
-                setState(() {
-                  _searchQuery = '';
-                  _page = 1;
-                });
-              },
+            child: Column(
+              children: [
+                SizedBox(
+                  height: 38,
+                  child: ListView(
+                    scrollDirection: Axis.horizontal,
+                    children:
+                        ['Semua', 'On Process', 'Approved', 'Not Approved'].map(
+                          (status) {
+                            final label = switch (status) {
+                              'On Process' => 'Diproses',
+                              'Approved' => 'Diterima',
+                              'Not Approved' => 'Ditolak',
+                              _ => 'Semua',
+                            };
+                            return Padding(
+                              padding: const EdgeInsets.only(right: 8),
+                              child: ChoiceChip(
+                                label: Text(label),
+                                selected: _statusFilter == status,
+                                onSelected: (_) =>
+                                    setState(() => _statusFilter = status),
+                              ),
+                            );
+                          },
+                        ).toList(),
+                  ),
+                ),
+                const SizedBox(height: 10),
+                HkSearchField(
+                  controller: _searchController,
+                  hintText: 'Cari nama atau NIK pelamar...',
+                  onSubmitted: (q) => setState(() {
+                    _searchQuery = q.trim();
+                    _page = 1;
+                  }),
+                  onClear: () {
+                    _searchController.clear();
+                    setState(() {
+                      _searchQuery = '';
+                      _page = 1;
+                    });
+                  },
+                ),
+              ],
             ),
           ),
           const Divider(height: 1),
@@ -174,7 +211,23 @@ class _VacancyApplicantsScreenState
                 );
               },
               data: (data) {
-                if (data.items.isEmpty) {
+                final filteredItems = _statusFilter == 'Semua'
+                    ? data.items
+                    : data.items.where((i) {
+                        final s = i.statusText.toLowerCase();
+                        if (_statusFilter == 'On Process') {
+                          return s.contains('process');
+                        }
+                        if (_statusFilter == 'Approved') {
+                          return s.contains('approve') || s.contains('terima');
+                        }
+                        if (_statusFilter == 'Not Approved') {
+                          return s.contains('not') || s.contains('tolak');
+                        }
+                        return true;
+                      }).toList();
+
+                if (filteredItems.isEmpty) {
                   return RefreshIndicator(
                     onRefresh: () async {
                       ref.invalidate(vacancyApplicantsProvider(_params));
@@ -184,7 +237,7 @@ class _VacancyApplicantsScreenState
                         HkEmptyView(
                           title: 'Belum ada pelamar',
                           subtitle:
-                              'Tidak ada pelamar yang terdaftar untuk lowongan ini.',
+                              'Tidak ada pelamar yang sesuai dengan filter atau kata kunci.',
                         ),
                       ],
                     ),
@@ -200,19 +253,19 @@ class _VacancyApplicantsScreenState
                         },
                         child: ListView.builder(
                           padding: const EdgeInsets.all(16),
-                          itemCount: data.items.length,
+                          itemCount: filteredItems.length,
                           itemBuilder: (context, index) {
-                            final item = data.items[index];
+                            final item = filteredItems[index];
                             return Padding(
                               padding: const EdgeInsets.only(bottom: 12),
                               child: _VacancyApplicantCard(
                                 item: item,
                                 onInspectProfile: () =>
                                     ApplicantProfileBottomSheet.show(
-                                  context,
-                                  applicantId: item.applicantId,
-                                  initialName: item.fullName,
-                                ),
+                                      context,
+                                      applicantId: item.applicantId,
+                                      initialName: item.fullName,
+                                    ),
                                 onReview: () => _openReviewDialog(item),
                               ),
                             );
@@ -252,7 +305,8 @@ class _VacancyApplicantCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final isPendingReview = item.statusText.toLowerCase().contains('process') ||
+    final isPendingReview =
+        item.statusText.toLowerCase().contains('process') ||
         item.statusText.toLowerCase().contains('diproses') ||
         item.statusText == '-';
 
@@ -280,6 +334,16 @@ class _VacancyApplicantCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 4),
+          if (item.vacancyCode.isNotEmpty) ...[
+            Text(
+              item.vacancyCode,
+              style: context.monoStyle.copyWith(
+                color: colors.accent,
+                fontSize: 12.5,
+              ),
+            ),
+            const SizedBox(height: 4),
+          ],
           Text(
             'NIK: ${item.nik} • HP: ${item.phone}',
             style: context.monoStyle.copyWith(color: colors.textMuted),
@@ -297,7 +361,9 @@ class _VacancyApplicantCard extends StatelessWidget {
           const SizedBox(height: 4),
           Text(
             'Tgl lamar: ${item.applyDate}',
-            style: context.textStyles.bodySmall?.copyWith(color: colors.textMuted),
+            style: context.textStyles.bodySmall?.copyWith(
+              color: colors.textMuted,
+            ),
           ),
           const SizedBox(height: 12),
           Wrap(
@@ -312,7 +378,8 @@ class _VacancyApplicantCard extends StatelessWidget {
               HkWhatsAppButton(
                 phone: item.phone,
                 candidateName: item.fullName,
-                contextDescription: 'lamaran pekerjaan di lowongan ${item.lastPosition}',
+                contextDescription:
+                    'lamaran pekerjaan di lowongan ${item.lastPosition}',
               ),
               if (isPendingReview)
                 FilledButton.icon(

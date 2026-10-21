@@ -40,13 +40,7 @@ class InterviewScheduleItem {
 
   String get qrCodeUrl => '${ApiEndpoints.qrCodeBaseUrl}SCHEDULE-$id.png';
 
-  int get candidateCount {
-    final match = RegExp(r'(\d+)').firstMatch(confirmedCount);
-    if (match != null) {
-      return int.tryParse(match.group(1)!) ?? 0;
-    }
-    return 0;
-  }
+  int get candidateCount => int.tryParse(confirmedCount) ?? 0;
 
   factory InterviewScheduleItem.fromDataTableRow(Map<String, Object?> row) {
     final id = (row['DT_RowId'] ?? '').toString();
@@ -57,7 +51,7 @@ class InterviewScheduleItem {
       date: HtmlCellParser.stripHtml(row['5']),
       timeRange: HtmlCellParser.stripHtml(row['6']),
       maxQuota: HtmlCellParser.stripHtml(row['7']),
-      confirmedCount: HtmlCellParser.stripHtml(row['8']),
+      confirmedCount: HtmlCellParser.extractFirstNumber(row['8']),
       status: HtmlCellParser.stripHtml(row['9']),
       createdAt: HtmlCellParser.stripHtml(row['11']),
     );
@@ -102,7 +96,7 @@ class InterviewCandidateItem {
     final rowId = (row['DT_RowId'] ?? '').toString();
     final appId =
         HtmlCellParser.extractFirstFunctionArg(row['1'], 'editShowPelamar') ??
-            rowId;
+        rowId;
 
     return InterviewCandidateItem(
       userAdvertId: rowId,
@@ -130,10 +124,11 @@ class InterviewCandidateItem {
     final rowId = (row['DT_RowId'] ?? '').toString();
     final appId =
         HtmlCellParser.extractFirstFunctionArg(row['1'], 'editShowPelamar') ??
-            rowId;
+        rowId;
 
-    final interviewCodeRaw =
-        row.containsKey('19') ? HtmlCellParser.stripHtml(row['19']) : '';
+    final interviewCodeRaw = row.containsKey('19')
+        ? HtmlCellParser.stripHtml(row['19'])
+        : '';
     final code = interviewCodeRaw.isNotEmpty && interviewCodeRaw != '-'
         ? interviewCodeRaw
         : fallbackInterviewCode;

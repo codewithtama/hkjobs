@@ -23,23 +23,24 @@ typedef InterviewParticipantsParams = ({
 
 final interviewParticipantsProvider = FutureProvider.autoDispose
     .family<PaginatedList<InterviewCandidateItem>, InterviewParticipantsParams>(
-        (ref, params) async {
-  final repo = ref.watch(interviewRepositoryProvider);
-  final res = await repo.fetchInterviewParticipants(
-    params.interviewId,
-    vacancyCode: params.vacancyCode,
-    interviewCode: params.interviewCode,
-    page: params.page,
-    limit: 20,
-    searchQuery: params.searchQuery,
-  );
-  switch (res) {
-    case Success<PaginatedList<InterviewCandidateItem>>(:final data):
-      return data;
-    case Failure<PaginatedList<InterviewCandidateItem>>(:final error):
-      throw error;
-  }
-});
+      (ref, params) async {
+        final repo = ref.watch(interviewRepositoryProvider);
+        final res = await repo.fetchInterviewParticipants(
+          params.interviewId,
+          vacancyCode: params.vacancyCode,
+          interviewCode: params.interviewCode,
+          page: params.page,
+          limit: 20,
+          searchQuery: params.searchQuery,
+        );
+        switch (res) {
+          case Success<PaginatedList<InterviewCandidateItem>>(:final data):
+            return data;
+          case Failure<PaginatedList<InterviewCandidateItem>>(:final error):
+            throw error;
+        }
+      },
+    );
 
 class InterviewParticipantsScreen extends ConsumerStatefulWidget {
   const InterviewParticipantsScreen({
@@ -62,15 +63,16 @@ class _InterviewParticipantsScreenState
     extends ConsumerState<InterviewParticipantsScreen> {
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
+  String _statusFilter = 'Semua';
   int _page = 1;
 
   InterviewParticipantsParams get _params => (
-        interviewId: widget.interviewId,
-        vacancyCode: widget.vacancyCode ?? '',
-        interviewCode: widget.interviewCode ?? '',
-        page: _page,
-        searchQuery: _searchQuery,
-      );
+    interviewId: widget.interviewId,
+    vacancyCode: widget.vacancyCode ?? '',
+    interviewCode: widget.interviewCode ?? '',
+    page: _page,
+    searchQuery: _searchQuery,
+  );
 
   @override
   void dispose() {
@@ -79,8 +81,10 @@ class _InterviewParticipantsScreenState
   }
 
   Future<void> _openEvaluationSheet(InterviewCandidateItem candidate) async {
-    final saved =
-        await InterviewEvaluationSheet.show(context, candidate: candidate);
+    final saved = await InterviewEvaluationSheet.show(
+      context,
+      candidate: candidate,
+    );
     if (saved == true && mounted) {
       ref.invalidate(interviewParticipantsProvider(_params));
     }
@@ -94,28 +98,60 @@ class _InterviewParticipantsScreenState
         : FormStrings.interviewParticipantsTitle;
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(title),
-      ),
+      appBar: AppBar(title: Text(title)),
       body: Column(
         children: [
           Container(
             color: context.colors.surfaceCard,
             padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
-            child: HkSearchField(
-              controller: _searchController,
-              hintText: 'Cari nama atau kota kandidat...',
-              onSubmitted: (q) => setState(() {
-                _searchQuery = q.trim();
-                _page = 1;
-              }),
-              onClear: () {
-                _searchController.clear();
-                setState(() {
-                  _searchQuery = '';
-                  _page = 1;
-                });
-              },
+            child: Column(
+              children: [
+                SizedBox(
+                  height: 38,
+                  child: ListView(
+                    scrollDirection: Axis.horizontal,
+                    children:
+                        [
+                          'Semua',
+                          'Konfirmasi',
+                          'Passed',
+                          'Failed',
+                          'Batal',
+                        ].map((status) {
+                          final label = switch (status) {
+                            'Passed' => 'Lolos',
+                            'Failed' => 'Gagal',
+                            _ => status,
+                          };
+                          return Padding(
+                            padding: const EdgeInsets.only(right: 8),
+                            child: ChoiceChip(
+                              label: Text(label),
+                              selected: _statusFilter == status,
+                              onSelected: (_) =>
+                                  setState(() => _statusFilter = status),
+                            ),
+                          );
+                        }).toList(),
+                  ),
+                ),
+                const SizedBox(height: 10),
+                HkSearchField(
+                  controller: _searchController,
+                  hintText: 'Cari nama atau kota kandidat...',
+                  onSubmitted: (q) => setState(() {
+                    _searchQuery = q.trim();
+                    _page = 1;
+                  }),
+                  onClear: () {
+                    _searchController.clear();
+                    setState(() {
+                      _searchQuery = '';
+                      _page = 1;
+                    });
+                  },
+                ),
+              ],
             ),
           ),
           const Divider(height: 1),
@@ -133,7 +169,28 @@ class _InterviewParticipantsScreenState
                 );
               },
               data: (data) {
-                if (data.items.isEmpty) {
+                final filteredItems = _statusFilter == 'Semua'
+                    ? data.items
+                    : data.items.where((i) {
+                        final s = i.status.toLowerCase();
+                        if (_statusFilter == 'Passed') {
+                          return s.contains('pass') || s.contains('lolos');
+                        }
+                        if (_statusFilter == 'Failed') {
+                          return s.contains('fail') ||
+                              s.contains('gagal') ||
+                              s.contains('tidak');
+                        }
+                        if (_statusFilter == 'Batal') {
+                          return s.contains('batal') || s.contains('cancel');
+                        }
+                        if (_statusFilter == 'Konfirmasi') {
+                          return s.contains('konfirm');
+                        }
+                        return true;
+                      }).toList();
+
+                if (filteredItems.isEmpty) {
                   return RefreshIndicator(
                     onRefresh: () async {
                       ref.invalidate(interviewParticipantsProvider(_params));
@@ -143,7 +200,7 @@ class _InterviewParticipantsScreenState
                         HkEmptyView(
                           title: 'Belum ada peserta interview',
                           subtitle:
-                              'Tidak ada kandidat yang terdaftar pada jadwal interview ini.',
+                              'Tidak ada kandidat yang sesuai dengan filter atau kata kunci.',
                         ),
                       ],
                     ),
@@ -156,23 +213,24 @@ class _InterviewParticipantsScreenState
                       child: RefreshIndicator(
                         onRefresh: () async {
                           ref.invalidate(
-                              interviewParticipantsProvider(_params));
+                            interviewParticipantsProvider(_params),
+                          );
                         },
                         child: ListView.builder(
                           padding: const EdgeInsets.all(16),
-                          itemCount: data.items.length,
+                          itemCount: filteredItems.length,
                           itemBuilder: (context, index) {
-                            final item = data.items[index];
+                            final item = filteredItems[index];
                             return Padding(
                               padding: const EdgeInsets.only(bottom: 12),
                               child: _ScheduleCandidateCard(
                                 item: item,
                                 onInspectProfile: () =>
                                     ApplicantProfileBottomSheet.show(
-                                  context,
-                                  applicantId: item.applicantId,
-                                  initialName: item.fullName,
-                                ),
+                                      context,
+                                      applicantId: item.applicantId,
+                                      initialName: item.fullName,
+                                    ),
                                 onEvaluate: () => _openEvaluationSheet(item),
                               ),
                             );
@@ -212,7 +270,8 @@ class _ScheduleCandidateCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final isPendingEvaluation = item.status.toLowerCase().contains('process') ||
+    final isPendingEvaluation =
+        item.status.toLowerCase().contains('process') ||
         item.status.toLowerCase().contains('konfirmasi') ||
         item.status == '-';
 

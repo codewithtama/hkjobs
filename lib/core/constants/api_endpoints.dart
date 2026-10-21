@@ -1,6 +1,7 @@
 abstract final class ApiEndpoints {
   static const String baseUrl = 'https://ops.hk-indonesia.id/hkjobs/';
-  static const String assetsBaseUrl = 'https://ops.hk-indonesia.id/assetshkjobs/';
+  static const String assetsBaseUrl =
+      'https://ops.hk-indonesia.id/assetshkjobs/';
   static const String qrCodeBaseUrl =
       'https://ops.hk-indonesia.id/assetshkjobs/qrcode/';
 
@@ -43,6 +44,14 @@ abstract final class ApiEndpoints {
       'advertisement/updateStatusApproval';
   static const String applicantNewComerTable = 'applicant/listTable';
   static const String applicantExistingTable = 'applicant/listTable2';
+  static String advertisementFilterTable({
+    required String cabang,
+    required String startDate,
+    required String endDate,
+  }) =>
+      'advertisement/listTableAdvertisementListFilter/$cabang/$startDate/$endDate';
+  static String applicantFilterTable(String opsiFilter) =>
+      'applicant/listTableFilter/$opsiFilter';
 
   // Interview
   static const String interviewListTable = 'interview/listTable';
@@ -50,6 +59,11 @@ abstract final class ApiEndpoints {
       'interview/listTableInterviewer/$adminId';
   static String interviewParticipantsTable(String interviewId) =>
       'interview/listTable2/$interviewId';
+  static String interviewFilterTable({
+    required String cabang,
+    required String startDate,
+    required String endDate,
+  }) => 'interview/listTable4/$cabang/$startDate/$endDate';
   static const String interviewConfirmedTable = 'Interview/listTableConfirmed';
   static const String interviewCanceledTable = 'Interview/listTableCanceled';
   static const String interviewPassedTable = 'interview/listTablePassed';
@@ -69,7 +83,8 @@ abstract final class ApiEndpoints {
   static String trainingParticipantStatusJson(String trainingListId) =>
       'training/editStatusPelamar/$trainingListId';
   static const String trainingUpdatePassed = 'training/updateLolosTraining';
-  static const String trainingUpdateFailed = 'training/updateTidakLolosTraining';
+  static const String trainingUpdateFailed =
+      'training/updateTidakLolosTraining';
   static const String trainingOnlineReset = 'training/updateAlasan';
   static const String trainingOnlineBypass = 'training/updateAlasanOnlineLolos';
 

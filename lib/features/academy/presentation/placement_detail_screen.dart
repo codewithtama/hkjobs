@@ -17,22 +17,24 @@ typedef PlacementPersonnelParams = ({
 });
 
 final placementPersonnelProvider = FutureProvider.autoDispose
-    .family<PaginatedList<PlacementPersonnelItem>, PlacementPersonnelParams>(
-        (ref, params) async {
-  final repo = ref.watch(academyRepositoryProvider);
-  final res = await repo.fetchPlacementPersonnel(
-    params.placementId,
-    page: params.page,
-    limit: 20,
-    searchQuery: params.searchQuery,
-  );
-  switch (res) {
-    case Success<PaginatedList<PlacementPersonnelItem>>(:final data):
-      return data;
-    case Failure<PaginatedList<PlacementPersonnelItem>>(:final error):
-      throw error;
-  }
-});
+    .family<PaginatedList<PlacementPersonnelItem>, PlacementPersonnelParams>((
+      ref,
+      params,
+    ) async {
+      final repo = ref.watch(academyRepositoryProvider);
+      final res = await repo.fetchPlacementPersonnel(
+        params.placementId,
+        page: params.page,
+        limit: 20,
+        searchQuery: params.searchQuery,
+      );
+      switch (res) {
+        case Success<PaginatedList<PlacementPersonnelItem>>(:final data):
+          return data;
+        case Failure<PaginatedList<PlacementPersonnelItem>>(:final error):
+          throw error;
+      }
+    });
 
 class PlacementDetailScreen extends ConsumerStatefulWidget {
   const PlacementDetailScreen({
@@ -49,17 +51,13 @@ class PlacementDetailScreen extends ConsumerStatefulWidget {
       _PlacementDetailScreenState();
 }
 
-class _PlacementDetailScreenState
-    extends ConsumerState<PlacementDetailScreen> {
+class _PlacementDetailScreenState extends ConsumerState<PlacementDetailScreen> {
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
   int _page = 1;
 
-  PlacementPersonnelParams get _params => (
-        placementId: widget.placementId,
-        page: _page,
-        searchQuery: _searchQuery,
-      );
+  PlacementPersonnelParams get _params =>
+      (placementId: widget.placementId, page: _page, searchQuery: _searchQuery);
 
   @override
   void dispose() {
@@ -90,10 +88,7 @@ class _PlacementDetailScreenState
       return;
     }
 
-    final launched = await launchUrl(
-      uri,
-      mode: LaunchMode.externalApplication,
-    );
+    final launched = await launchUrl(uri, mode: LaunchMode.externalApplication);
     if (!launched && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -170,9 +165,7 @@ class _PlacementDetailScreenState
         : FormStrings.placementPersonnelTitle;
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(title),
-      ),
+      appBar: AppBar(title: Text(title)),
       body: Column(
         children: [
           Container(
@@ -197,9 +190,8 @@ class _PlacementDetailScreenState
           const Divider(height: 1),
           Expanded(
             child: asyncData.when(
-              loading: () => const HkLoadingView(
-                message: FormStrings.loadingPersonnel,
-              ),
+              loading: () =>
+                  const HkLoadingView(message: FormStrings.loadingPersonnel),
               error: (err, _) {
                 final msg = err is AppFailure ? err.message : err.toString();
                 return HkErrorView(
@@ -350,7 +342,9 @@ class _PlacementPersonnelCard extends StatelessWidget {
               decoration: BoxDecoration(
                 color: colors.successMuted,
                 borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: colors.success.withValues(alpha: 0.3)),
+                border: Border.all(
+                  color: colors.success.withValues(alpha: 0.3),
+                ),
               ),
               child: Row(
                 children: [

@@ -12,7 +12,10 @@ class ReviewApplicationDialog extends ConsumerStatefulWidget {
 
   final VacancyApplicationItem item;
 
-  static Future<bool?> show(BuildContext context, {required VacancyApplicationItem item}) {
+  static Future<bool?> show(
+    BuildContext context, {
+    required VacancyApplicationItem item,
+  }) {
     return showDialog<bool>(
       context: context,
       builder: (_) => ReviewApplicationDialog(item: item),
@@ -111,12 +114,18 @@ class _ReviewApplicationDialogState
                 decoration: BoxDecoration(
                   color: colors.accentMuted,
                   borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: colors.accent.withValues(alpha: 0.3)),
+                  border: Border.all(
+                    color: colors.accent.withValues(alpha: 0.3),
+                  ),
                 ),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Icon(Icons.info_outline_rounded, size: 20, color: colors.accent),
+                    Icon(
+                      Icons.info_outline_rounded,
+                      size: 20,
+                      color: colors.accent,
+                    ),
                     const SizedBox(width: 10),
                     Expanded(
                       child: Text(
@@ -146,7 +155,9 @@ class _ReviewApplicationDialogState
       ),
       actions: [
         TextButton(
-          onPressed: _submitting ? null : () => Navigator.of(context).pop(false),
+          onPressed: _submitting
+              ? null
+              : () => Navigator.of(context).pop(false),
           child: const Text(AppStrings.cancelButton),
         ),
         FilledButton(

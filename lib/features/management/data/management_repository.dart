@@ -156,14 +156,14 @@ class PlacementDraft {
   final String timeEnd;
 
   Map<String, String> toFormDataMap() => <String, String>{
-        'projectId': projectId,
-        'lokasiProject': lokasiProject.trim(),
-        'positionId': positionId,
-        'kuotaApplicant': quota.trim(),
-        'tanggal': tanggal,
-        'timeStart': timeStart,
-        'timeEnd': timeEnd,
-      };
+    'projectId': projectId,
+    'lokasiProject': lokasiProject.trim(),
+    'positionId': positionId,
+    'kuotaApplicant': quota.trim(),
+    'tanggal': tanggal,
+    'timeStart': timeStart,
+    'timeEnd': timeEnd,
+  };
 }
 
 final managementRepositoryProvider = Provider<ManagementRepository>((ref) {
@@ -172,21 +172,21 @@ final managementRepositoryProvider = Provider<ManagementRepository>((ref) {
 
 /// Pilihan `<select>` dari halaman create (server-rendered), di-cache per path
 /// selama layar form hidup.
-final formSelectsProvider =
-    FutureProvider.autoDispose.family<FormSelects, String>((ref, path) async {
-  final repo = ref.watch(managementRepositoryProvider);
-  final result = await repo.loadSelects(path);
-  switch (result) {
-    case Success<FormSelects>(:final data):
-      return data;
-    case Failure<FormSelects>(:final error):
-      throw error;
-  }
-});
+final formSelectsProvider = FutureProvider.autoDispose
+    .family<FormSelects, String>((ref, path) async {
+      final repo = ref.watch(managementRepositoryProvider);
+      final result = await repo.loadSelects(path);
+      switch (result) {
+        case Success<FormSelects>(:final data):
+          return data;
+        case Failure<FormSelects>(:final error):
+          throw error;
+      }
+    });
 
 class ManagementRepository {
   const ManagementRepository({required HkJobsApiClient apiClient})
-      : _apiClient = apiClient;
+    : _apiClient = apiClient;
 
   final HkJobsApiClient _apiClient;
 
@@ -197,8 +197,9 @@ class ManagementRepository {
         return Failure<FormSelects>(error);
       case Success<String>(:final data):
         try {
-          final parsed =
-              await Isolate.run(() => FormHtmlParser.parseSelects(data));
+          final parsed = await Isolate.run(
+            () => FormHtmlParser.parseSelects(data),
+          );
           return Success<FormSelects>(parsed);
         } on Object {
           return const Failure<FormSelects>(ParseFailure());

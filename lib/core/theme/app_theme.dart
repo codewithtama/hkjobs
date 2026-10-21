@@ -138,10 +138,10 @@ extension HkThemeContext on BuildContext {
   TextTheme get textStyles => Theme.of(this).textTheme;
 
   TextStyle get monoStyle => GoogleFonts.jetBrainsMono(
-        fontSize: 12,
-        fontWeight: FontWeight.w600,
-        color: colors.textPrimary,
-      );
+    fontSize: 12,
+    fontWeight: FontWeight.w600,
+    color: colors.textPrimary,
+  );
 }
 
 abstract final class AppTheme {
@@ -237,8 +237,10 @@ abstract final class AppTheme {
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: tokens.surfaceCard,
-        contentPadding:
-            const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 14,
+        ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
           borderSide: BorderSide(color: tokens.border),

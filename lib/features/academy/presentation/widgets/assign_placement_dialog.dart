@@ -57,14 +57,14 @@ class _AssignPlacementDialogState extends ConsumerState<AssignPlacementDialog> {
             if (!snapshot.hasData) {
               return const SizedBox(
                 height: 120,
-                child: Center(
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                ),
+                child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
               );
             }
 
             final res = snapshot.data!;
-            if (res case Failure<PaginatedList<PlacementScheduleItem>>(:final error)) {
+            if (res case Failure<PaginatedList<PlacementScheduleItem>>(
+              :final error,
+            )) {
               return Padding(
                 padding: const EdgeInsets.symmetric(vertical: 8),
                 child: Text(
@@ -77,7 +77,9 @@ class _AssignPlacementDialogState extends ConsumerState<AssignPlacementDialog> {
             }
 
             final schedules =
-                (res as Success<PaginatedList<PlacementScheduleItem>>).data.items;
+                (res as Success<PaginatedList<PlacementScheduleItem>>)
+                    .data
+                    .items;
 
             if (schedules.isEmpty) {
               return Padding(
@@ -168,7 +170,9 @@ class _AssignPlacementDialogState extends ConsumerState<AssignPlacementDialog> {
       ),
       actions: [
         TextButton(
-          onPressed: _isSubmitting ? null : () => Navigator.of(context).pop(false),
+          onPressed: _isSubmitting
+              ? null
+              : () => Navigator.of(context).pop(false),
           child: const Text('Batal'),
         ),
         FilledButton(

@@ -18,20 +18,20 @@ final hkJobsApiClientProvider = Provider<HkJobsApiClient>((ref) {
 
 class HkJobsApiClient {
   HkJobsApiClient({required SecureSessionStorage storage})
-      : _storage = storage,
-        _dio = Dio(
-          BaseOptions(
-            baseUrl: ApiEndpoints.baseUrl,
-            connectTimeout: const Duration(seconds: 15),
-            receiveTimeout: const Duration(seconds: 20),
-            sendTimeout: const Duration(seconds: 15),
-            contentType: Headers.formUrlEncodedContentType,
-            responseType: ResponseType.plain,
-            followRedirects: false,
-            validateStatus: (status) =>
-                status != null && status >= 200 && status < 400,
-          ),
-        ) {
+    : _storage = storage,
+      _dio = Dio(
+        BaseOptions(
+          baseUrl: ApiEndpoints.baseUrl,
+          connectTimeout: const Duration(seconds: 15),
+          receiveTimeout: const Duration(seconds: 20),
+          sendTimeout: const Duration(seconds: 15),
+          contentType: Headers.formUrlEncodedContentType,
+          responseType: ResponseType.plain,
+          followRedirects: false,
+          validateStatus: (status) =>
+              status != null && status >= 200 && status < 400,
+        ),
+      ) {
     _dio.interceptors.add(
       InterceptorsWrapper(
         onRequest: _onRequest,
@@ -89,7 +89,8 @@ class HkJobsApiClient {
     ErrorInterceptorHandler handler,
   ) async {
     final req = err.requestOptions;
-    final isIdempotent = req.method == 'GET' ||
+    final isIdempotent =
+        req.method == 'GET' ||
         req.path.contains('listTable') ||
         req.path.contains('dataDashboardFilter');
     final retryCount = (req.extra['retry_count'] as int?) ?? 0;
@@ -160,10 +161,7 @@ class HkJobsApiClient {
           'phone': stored.phone,
           'password': stored.password,
         },
-        options: Options(
-          headers: <String, Object?>{},
-          followRedirects: false,
-        ),
+        options: Options(headers: <String, Object?>{}, followRedirects: false),
       );
 
       final newCookie = extractSessionCookie(loginResp.headers);
@@ -234,8 +232,10 @@ class HkJobsApiClient {
         if (!refreshed) {
           return const Failure<String>(SessionExpiredFailure());
         }
-        response =
-            await _dio.post<String>(path, data: FormData.fromMap(formFields));
+        response = await _dio.post<String>(
+          path,
+          data: FormData.fromMap(formFields),
+        );
       }
       return Success<String>(response.data ?? '');
     } on DioException catch (e) {
@@ -370,14 +370,8 @@ class HkJobsApiClient {
   }) {
     return _dio.post<String>(
       ApiEndpoints.login,
-      data: <String, String>{
-        'phone': phone,
-        'password': password,
-      },
-      options: Options(
-        headers: <String, Object?>{},
-        followRedirects: false,
-      ),
+      data: <String, String>{'phone': phone, 'password': password},
+      options: Options(headers: <String, Object?>{}, followRedirects: false),
     );
   }
 

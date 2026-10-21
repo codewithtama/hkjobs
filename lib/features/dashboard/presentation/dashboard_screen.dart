@@ -18,14 +18,13 @@ class DashboardScreen extends ConsumerWidget {
       context: context,
       firstDate: DateTime(2020),
       lastDate: DateTime(now.year + 5, 12, 31),
-      initialDateRange: DateTimeRange(
-        start: DateTime(2025, 1, 1),
-        end: now,
-      ),
+      initialDateRange: DateTimeRange(start: DateTime(2025, 1, 1), end: now),
     );
     if (picked == null || !context.mounted) return;
     final fmt = DateFormat('yyyy-MM-dd');
-    await ref.read(dashboardControllerProvider.notifier).applyDateRange(
+    await ref
+        .read(dashboardControllerProvider.notifier)
+        .applyDateRange(
           startDate: fmt.format(picked.start),
           endDate: fmt.format(picked.end),
         );
@@ -41,7 +40,8 @@ class DashboardScreen extends ConsumerWidget {
         final msg = err is AppFailure ? err.message : err.toString();
         return HkErrorView(
           message: msg,
-          onRetry: () => ref.read(dashboardControllerProvider.notifier).refresh(),
+          onRetry: () =>
+              ref.read(dashboardControllerProvider.notifier).refresh(),
         );
       },
       data: (summary) {
@@ -212,10 +212,7 @@ class _SectionHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Text(
-      title,
-      style: context.textStyles.titleMedium,
-    );
+    return Text(title, style: context.textStyles.titleMedium);
   }
 }
 
@@ -246,8 +243,10 @@ class _ApplicantHeroCard extends StatelessWidget {
                 ),
               ),
               Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
                 decoration: BoxDecoration(
                   color: colors.onAccent.withValues(alpha: 0.16),
                   borderRadius: BorderRadius.circular(6),
@@ -292,10 +291,7 @@ class _ApplicantHeroCard extends StatelessWidget {
 }
 
 class _SubPoolPill extends StatelessWidget {
-  const _SubPoolPill({
-    required this.label,
-    required this.value,
-  });
+  const _SubPoolPill({required this.label, required this.value});
 
   final String label;
   final String value;
@@ -385,10 +381,7 @@ class _MetricTile extends StatelessWidget {
           const SizedBox(height: 8),
           Text(
             value,
-            style: context.monoStyle.copyWith(
-              fontSize: 20,
-              color: accentColor,
-            ),
+            style: context.monoStyle.copyWith(fontSize: 20, color: accentColor),
           ),
         ],
       ),
@@ -414,10 +407,8 @@ class _RegionalBranchesCard extends StatelessWidget {
         runSpacing: 8,
         children: DashboardSummary.regionalBranches
             .map(
-              (branch) => HkStatusBadge(
-                label: branch,
-                tone: HkBadgeTone.accent,
-              ),
+              (branch) =>
+                  HkStatusBadge(label: branch, tone: HkBadgeTone.accent),
             )
             .toList(),
       ),

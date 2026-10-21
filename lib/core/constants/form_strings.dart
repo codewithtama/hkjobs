@@ -128,7 +128,8 @@ abstract final class FormStrings {
   static const String scanHint =
       'Arahkan kamera ke QR lowongan atau jadwal interview.';
   static const String scanLoading = 'Mencari data dari QR...';
-  static const String scanUnknown = 'QR ini bukan QR lowongan atau jadwal HKJobs.';
+  static const String scanUnknown =
+      'QR ini bukan QR lowongan atau jadwal HKJobs.';
   static const String scanCameraDenied =
       'Izin kamera ditolak. Aktifkan izin kamera di pengaturan perangkat.';
   static const String scanCameraError = 'Kamera tidak dapat dibuka.';

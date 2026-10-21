@@ -36,9 +36,9 @@ class AppUpdateState {
 
 final appUpdateControllerProvider =
     StateNotifierProvider<AppUpdateController, AppUpdateState>((ref) {
-  final repo = ref.watch(appUpdateRepositoryProvider);
-  return AppUpdateController(repo);
-});
+      final repo = ref.watch(appUpdateRepositoryProvider);
+      return AppUpdateController(repo);
+    });
 
 class AppUpdateController extends StateNotifier<AppUpdateState> {
   AppUpdateController(this._repository) : super(const AppUpdateState());
@@ -57,10 +57,7 @@ class AppUpdateController extends StateNotifier<AppUpdateState> {
         );
         return data;
       case Failure<UpdateInfo>(:final error):
-        state = state.copyWith(
-          isChecking: false,
-          errorMessage: error.message,
-        );
+        state = state.copyWith(isChecking: false, errorMessage: error.message);
         return null;
     }
   }

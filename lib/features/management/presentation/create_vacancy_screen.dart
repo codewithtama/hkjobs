@@ -60,7 +60,9 @@ class _CreateVacancyScreenState extends ConsumerState<CreateVacancyScreen> {
 
     setState(() => _isLoadingSubBranches = true);
 
-    final res = await ref.read(managementRepositoryProvider).loadLocations(
+    final res = await ref
+        .read(managementRepositoryProvider)
+        .loadLocations(
           endpoint: ApiEndpoints.vacancyBranchLocations,
           parentId: selection.first,
           usePost: true,
@@ -107,35 +109,52 @@ class _CreateVacancyScreenState extends ConsumerState<CreateVacancyScreen> {
     if (!(_formKey.currentState?.validate() ?? false)) return;
 
     if (_selectedBranch.isEmpty) {
-      setState(() => _submitError = FormStrings.required(FormStrings.vacancyBranch));
+      setState(
+        () => _submitError = FormStrings.required(FormStrings.vacancyBranch),
+      );
       return;
     }
     if (_selectedSubBranch.isEmpty) {
-      setState(() => _submitError = FormStrings.required(FormStrings.vacancySubBranch));
+      setState(
+        () => _submitError = FormStrings.required(FormStrings.vacancySubBranch),
+      );
       return;
     }
     if (_selectedPosition.isEmpty) {
-      setState(() => _submitError = FormStrings.required(FormStrings.vacancyPosition));
+      setState(
+        () => _submitError = FormStrings.required(FormStrings.vacancyPosition),
+      );
       return;
     }
     if (_selectedCities.isEmpty) {
-      setState(() => _submitError = FormStrings.required(FormStrings.vacancyCities));
+      setState(
+        () => _submitError = FormStrings.required(FormStrings.vacancyCities),
+      );
       return;
     }
     if (_selectedExperience.isEmpty) {
-      setState(() => _submitError = FormStrings.required(FormStrings.vacancyExperience));
+      setState(
+        () =>
+            _submitError = FormStrings.required(FormStrings.vacancyExperience),
+      );
       return;
     }
     if (_startDate == null || _startDate!.isEmpty) {
-      setState(() => _submitError = FormStrings.required(FormStrings.vacancyStart));
+      setState(
+        () => _submitError = FormStrings.required(FormStrings.vacancyStart),
+      );
       return;
     }
     if (_endDate == null || _endDate!.isEmpty) {
-      setState(() => _submitError = FormStrings.required(FormStrings.vacancyEnd));
+      setState(
+        () => _submitError = FormStrings.required(FormStrings.vacancyEnd),
+      );
       return;
     }
     if (_iconImage == null) {
-      setState(() => _submitError = FormStrings.required(FormStrings.vacancyIcon));
+      setState(
+        () => _submitError = FormStrings.required(FormStrings.vacancyIcon),
+      );
       return;
     }
 
@@ -158,8 +177,9 @@ class _CreateVacancyScreenState extends ConsumerState<CreateVacancyScreen> {
       banner: _bannerImage,
     );
 
-    final res =
-        await ref.read(managementRepositoryProvider).createVacancy(draft);
+    final res = await ref
+        .read(managementRepositoryProvider)
+        .createVacancy(draft);
 
     if (!mounted) return;
 
@@ -187,17 +207,15 @@ class _CreateVacancyScreenState extends ConsumerState<CreateVacancyScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final selectsAsync =
-        ref.watch(formSelectsProvider(ApiEndpoints.vacancyCreate));
+    final selectsAsync = ref.watch(
+      formSelectsProvider(ApiEndpoints.vacancyCreate),
+    );
     final colors = context.colors;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text(FormStrings.createVacancyTitle),
-      ),
+      appBar: AppBar(title: const Text(FormStrings.createVacancyTitle)),
       body: selectsAsync.when(
-        loading: () =>
-            const HkLoadingView(message: FormStrings.loadingForm),
+        loading: () => const HkLoadingView(message: FormStrings.loadingForm),
         error: (err, _) => HkErrorView(
           message: err.toString(),
           onRetry: () =>
@@ -315,7 +333,8 @@ class _CreateVacancyScreenState extends ConsumerState<CreateVacancyScreen> {
                   maxLines: 5,
                   decoration: const InputDecoration(
                     labelText: FormStrings.vacancyDescription,
-                    hintText: 'Deskripsi kualifikasi, tugas pekerjaan, dan persyaratan...',
+                    hintText:
+                        'Deskripsi kualifikasi, tugas pekerjaan, dan persyaratan...',
                   ),
                   validator: (v) => FormValidators.requiredText(
                     v ?? '',
@@ -344,9 +363,9 @@ class _CreateVacancyScreenState extends ConsumerState<CreateVacancyScreen> {
                           child: CircularProgressIndicator(strokeWidth: 2),
                         )
                       : const Icon(Icons.save_rounded),
-                  label: Text(_isSubmitting
-                      ? FormStrings.saving
-                      : FormStrings.save),
+                  label: Text(
+                    _isSubmitting ? FormStrings.saving : FormStrings.save,
+                  ),
                 ),
                 const SizedBox(height: 32),
               ],

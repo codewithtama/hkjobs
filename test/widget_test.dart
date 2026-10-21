@@ -64,7 +64,8 @@ void main() {
   test('VacancyApplicationItem parses listTable2 row correctly', () {
     final row = <String, Object?>{
       'DT_RowId': 'useradv_999',
-      '1': '<a href="javascript:void(0)" onclick="editShowPelamar(777)">AHMAD FAUZI</a>',
+      '1':
+          '<a href="javascript:void(0)" onclick="editShowPelamar(777)">AHMAD FAUZI</a>',
       '2': '3201234567890001',
       '3': '1998-05-12',
       '4': 'Laki-laki',
@@ -78,8 +79,10 @@ void main() {
       '14': 'ahmad@example.com',
       '17': 'Jakarta Selatan',
       '20': '2026-10-15 08:30:00',
-      '21': '<a href="https://ops.hk-indonesia.id/assetshkjobs/ktp/ktp.jpg">KTP</a>',
+      '21':
+          '<a href="https://ops.hk-indonesia.id/assetshkjobs/ktp/ktp.jpg">KTP</a>',
       '22': '<label class="badge badge-warning">On Process</label>',
+      '26': 'HK02_2026_CS_JAKSEL',
     };
     final item = VacancyApplicationItem.fromVacancyApplicantsTableRow(row);
     expect(item.userAdvertId, 'useradv_999');
@@ -91,12 +94,59 @@ void main() {
     expect(item.lastPosition, 'CLEANING SERVICE');
     expect(item.city, 'Jakarta Selatan');
     expect(item.statusText, 'On Process');
+    expect(item.vacancyCode, 'HK02_2026_CS_JAKSEL');
   });
+
+  test(
+    'HtmlCellParser.extractFirstNumber extracts clean numeric string from HTML',
+    () {
+      expect(
+        HtmlCellParser.extractFirstNumber(
+          '0&nbsp;&nbsp;<button class="btn">Lihat</button>',
+        ),
+        '0',
+      );
+      expect(
+        HtmlCellParser.extractFirstNumber(
+          '12&nbsp;&nbsp;<button>Lihat</button>',
+        ),
+        '12',
+      );
+      expect(HtmlCellParser.extractFirstNumber('3'), '3');
+      expect(HtmlCellParser.extractFirstNumber(''), '0');
+      expect(HtmlCellParser.extractFirstNumber(null), '0');
+    },
+  );
+
+  test(
+    'InterviewScheduleItem parses confirmedCount cleanly from raw HTML button cell',
+    () {
+      final row = <String, Object?>{
+        'DT_RowId': 'int_241',
+        '1': 'CD_INTERVIEW_241',
+        '2': 'HK02_CSO_JAWA_BARAT_OKTOBER_2026',
+        '5': '21-10-2026',
+        '6': '06:00 - 23:00',
+        '7': '1',
+        '8': '0&nbsp;&nbsp;<button onclick="openDetail(241)">Lihat</button>',
+        '9': '<label class="badge badge-success">Ongoing</label>',
+        '11': '2026-10-20 10:00:00',
+      };
+      final schedule = InterviewScheduleItem.fromDataTableRow(row);
+      expect(schedule.id, 'int_241');
+      expect(schedule.code, 'CD_INTERVIEW_241');
+      expect(schedule.vacancyCode, 'HK02_CSO_JAWA_BARAT_OKTOBER_2026');
+      expect(schedule.maxQuota, '1');
+      expect(schedule.confirmedCount, '0');
+      expect(schedule.candidateCount, 0);
+    },
+  );
 
   test('InterviewCandidateItem parses listTable2 participant row correctly', () {
     final row = <String, Object?>{
       'DT_RowId': 'row_55',
-      '1': '<a href="javascript:void(0)" onclick="editShowPelamar(333)">BUDI SANTOSO</a>',
+      '1':
+          '<a href="javascript:void(0)" onclick="editShowPelamar(333)">BUDI SANTOSO</a>',
       '4': '2026-10-18',
       '6': '08987654321',
       '7': 'Bandung',
@@ -149,14 +199,19 @@ void main() {
       '1': 'IBNU ARIANTO',
       '2': 'OPERATOR',
       '4': 'CIREBON SUPER BLOK',
-      '5': '<a href="https://ops.hk-indonesia.id/hkjobs/pakelarin/suratTugas/409">Unduh</a>',
-      '7': '<a href="https://ops.hk-indonesia.id/assetshkjobs/surat_tugas/ST-6460_409.pdf">ST-6460_409.pdf</a>',
+      '5':
+          '<a href="https://ops.hk-indonesia.id/hkjobs/pakelarin/suratTugas/409">Unduh</a>',
+      '7':
+          '<a href="https://ops.hk-indonesia.id/assetshkjobs/surat_tugas/ST-6460_409.pdf">ST-6460_409.pdf</a>',
       '8': '<label class="badge badge-success">Diterima</label>',
     };
     final acceptedItem = PlacementPersonnelItem.fromDataTableRow(acceptedRow);
     expect(acceptedItem.isAccepted, true);
     expect(acceptedItem.isWaitingApproval, false);
-    expect(acceptedItem.suratTugasPdfUrl, 'https://ops.hk-indonesia.id/assetshkjobs/surat_tugas/ST-6460_409.pdf');
+    expect(
+      acceptedItem.suratTugasPdfUrl,
+      'https://ops.hk-indonesia.id/assetshkjobs/surat_tugas/ST-6460_409.pdf',
+    );
   });
 
   test('PlacementDraft formats FormData map to match backend contract', () {
@@ -193,88 +248,117 @@ void main() {
     expect(vacancy.qrCodeUrl, contains('ADVERT-105.png'));
   });
 
-  test('PlacementScheduleItem parses listTable13 production row with html link', () {
-    final row = <String, Object?>{
-      'DT_RowId': '212',
-      '0': 1,
-      '1': '<div class="btn-group" role="group" aria-label="Action">\r\n'
-          '<a href="https://ops.hk-indonesia.id/hkjobs/pakelarin/detailpenempatan/212">PENEMPATAN_212</a>\r\n'
-          '</div>',
-      '2': 'CIREBON SUPER BLOK',
-      '3': '1',
-      '4': 'OPERATOR - CLEANING SERVICE',
-      '5': '21-10-2026',
-      '6': '<button onclick="editPenempatanschedule(212)"></button>',
-    };
-    final item = PlacementScheduleItem.fromDataTableRow(row);
-    expect(item.id, '212');
-    expect(item.code, 'PENEMPATAN_212');
-    expect(item.projectName, 'CIREBON SUPER BLOK');
-    expect(item.quota, '1');
-    expect(item.positionName, 'OPERATOR - CLEANING SERVICE');
-    expect(item.date, '21-10-2026');
-  });
+  test(
+    'PlacementScheduleItem parses listTable13 production row with html link',
+    () {
+      final row = <String, Object?>{
+        'DT_RowId': '212',
+        '0': 1,
+        '1':
+            '<div class="btn-group" role="group" aria-label="Action">\r\n'
+            '<a href="https://ops.hk-indonesia.id/hkjobs/pakelarin/detailpenempatan/212">PENEMPATAN_212</a>\r\n'
+            '</div>',
+        '2': 'CIREBON SUPER BLOK',
+        '3': '1',
+        '4': 'OPERATOR - CLEANING SERVICE',
+        '5': '21-10-2026',
+        '6': '<button onclick="editPenempatanschedule(212)"></button>',
+      };
+      final item = PlacementScheduleItem.fromDataTableRow(row);
+      expect(item.id, '212');
+      expect(item.code, 'PENEMPATAN_212');
+      expect(item.projectName, 'CIREBON SUPER BLOK');
+      expect(item.quota, '1');
+      expect(item.positionName, 'OPERATOR - CLEANING SERVICE');
+      expect(item.date, '21-10-2026');
+    },
+  );
 
   test('HtmlCellParser parses list-based row payload cleanly', () {
-    const raw = '{"recordsTotal":1,"recordsFiltered":1,"data":[["1","PENEMPATAN_100","SAFFRON"]]}';
+    const raw =
+        '{"recordsTotal":1,"recordsFiltered":1,"data":[["1","PENEMPATAN_100","SAFFRON"]]}';
     final parsed = HtmlCellParser.parseDataTablePayload(raw);
     expect(parsed.totalRecords, 1);
     expect(parsed.rows.length, 1);
     expect(parsed.rows.first['1'], 'PENEMPATAN_100');
   });
 
-  test('PaginatedList correctly calculates totalPages and navigation state', () {
-    const list = PaginatedList<String>(
-      totalCount: 55,
-      items: ['a', 'b'],
-      page: 2,
-      pageSize: 20,
-    );
-    expect(list.totalPages, 3);
-    expect(list.hasPreviousPage, isTrue);
-    expect(list.hasNextPage, isTrue);
+  test(
+    'PaginatedList correctly calculates totalPages and navigation state',
+    () {
+      const list = PaginatedList<String>(
+        totalCount: 55,
+        items: ['a', 'b'],
+        page: 2,
+        pageSize: 20,
+      );
+      expect(list.totalPages, 3);
+      expect(list.hasPreviousPage, isTrue);
+      expect(list.hasNextPage, isTrue);
 
-    const firstPage = PaginatedList<String>(
-      totalCount: 55,
-      items: ['a', 'b'],
-      page: 1,
-      pageSize: 20,
-    );
-    expect(firstPage.hasPreviousPage, isFalse);
-    expect(firstPage.hasNextPage, isTrue);
+      const firstPage = PaginatedList<String>(
+        totalCount: 55,
+        items: ['a', 'b'],
+        page: 1,
+        pageSize: 20,
+      );
+      expect(firstPage.hasPreviousPage, isFalse);
+      expect(firstPage.hasNextPage, isTrue);
 
-    const lastPage = PaginatedList<String>(
-      totalCount: 55,
-      items: ['a', 'b'],
-      page: 3,
-      pageSize: 20,
-    );
-    expect(lastPage.hasPreviousPage, isTrue);
-    expect(lastPage.hasNextPage, isFalse);
+      const lastPage = PaginatedList<String>(
+        totalCount: 55,
+        items: ['a', 'b'],
+        page: 3,
+        pageSize: 20,
+      );
+      expect(lastPage.hasPreviousPage, isTrue);
+      expect(lastPage.hasNextPage, isFalse);
 
-    const emptyList = PaginatedList<String>(
-      totalCount: 0,
-      items: [],
-      page: 1,
-      pageSize: 20,
-    );
-    expect(emptyList.totalPages, 1);
-    expect(emptyList.hasPreviousPage, isFalse);
-    expect(emptyList.hasNextPage, isFalse);
-  });
+      const emptyList = PaginatedList<String>(
+        totalCount: 0,
+        items: [],
+        page: 1,
+        pageSize: 20,
+      );
+      expect(emptyList.totalPages, 1);
+      expect(emptyList.hasPreviousPage, isFalse);
+      expect(emptyList.hasNextPage, isFalse);
+    },
+  );
 
   test('WhatsAppLauncher normalizes Indonesian phone numbers cleanly', () {
     // Starting with 0
-    expect(WhatsAppLauncher.normalizeIndonesianPhone('089503091346'), '6289503091346');
+    expect(
+      WhatsAppLauncher.normalizeIndonesianPhone('089503091346'),
+      '6289503091346',
+    );
     // Starting with 8 (from screenshot: 83120980567, 83827646183)
-    expect(WhatsAppLauncher.normalizeIndonesianPhone('83120980567'), '6283120980567');
-    expect(WhatsAppLauncher.normalizeIndonesianPhone('83827646183'), '6283827646183');
+    expect(
+      WhatsAppLauncher.normalizeIndonesianPhone('83120980567'),
+      '6283120980567',
+    );
+    expect(
+      WhatsAppLauncher.normalizeIndonesianPhone('83827646183'),
+      '6283827646183',
+    );
     // Starting with +62 or 62
-    expect(WhatsAppLauncher.normalizeIndonesianPhone('+628123456789'), '628123456789');
-    expect(WhatsAppLauncher.normalizeIndonesianPhone('628123456789'), '628123456789');
+    expect(
+      WhatsAppLauncher.normalizeIndonesianPhone('+628123456789'),
+      '628123456789',
+    );
+    expect(
+      WhatsAppLauncher.normalizeIndonesianPhone('628123456789'),
+      '628123456789',
+    );
     // With spaces, dashes, or formatting
-    expect(WhatsAppLauncher.normalizeIndonesianPhone('0812-3456-7890'), '6281234567890');
-    expect(WhatsAppLauncher.normalizeIndonesianPhone('+62 812 3456 7890'), '6281234567890');
+    expect(
+      WhatsAppLauncher.normalizeIndonesianPhone('0812-3456-7890'),
+      '6281234567890',
+    );
+    expect(
+      WhatsAppLauncher.normalizeIndonesianPhone('+62 812 3456 7890'),
+      '6281234567890',
+    );
     // Invalid numbers
     expect(WhatsAppLauncher.normalizeIndonesianPhone(''), isNull);
     expect(WhatsAppLauncher.normalizeIndonesianPhone('123'), isNull);

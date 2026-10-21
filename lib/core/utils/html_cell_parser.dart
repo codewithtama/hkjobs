@@ -2,10 +2,7 @@ import 'dart:convert';
 import 'package:html/parser.dart' as html_parser;
 
 class ParsedDataTableResult {
-  const ParsedDataTableResult({
-    required this.totalRecords,
-    required this.rows,
-  });
+  const ParsedDataTableResult({required this.totalRecords, required this.rows});
 
   final int totalRecords;
   final List<Map<String, Object?>> rows;
@@ -22,6 +19,13 @@ abstract final class HtmlCellParser {
         .replaceAll(RegExp(r'\s+'), ' ')
         .trim();
     return cleaned.isEmpty ? '-' : cleaned;
+  }
+
+  static String extractFirstNumber(Object? raw, {String fallback = '0'}) {
+    if (raw == null) return fallback;
+    final text = raw.toString();
+    final match = RegExp(r'(\d+)').firstMatch(text);
+    return match?.group(1) ?? fallback;
   }
 
   static List<String> extractHrefs(Object? raw) {
@@ -76,9 +80,7 @@ abstract final class HtmlCellParser {
       if (item is Map<String, Object?>) {
         rows.add(item);
       } else if (item is Map) {
-        rows.add(
-          item.map((key, value) => MapEntry(key.toString(), value)),
-        );
+        rows.add(item.map((key, value) => MapEntry(key.toString(), value)));
       } else if (item is List) {
         final rowMap = <String, Object?>{};
         for (var i = 0; i < item.length; i++) {
@@ -127,7 +129,8 @@ abstract final class HtmlCellParser {
       role = 'Super Admin';
     }
 
-    final isLoginPage = doc.querySelector('form.login') != null ||
+    final isLoginPage =
+        doc.querySelector('form.login') != null ||
         (doc.querySelector('title')?.text.contains('Login Admin') ?? false);
 
     return <String, String>{

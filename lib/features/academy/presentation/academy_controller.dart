@@ -40,8 +40,8 @@ class AcademyViewState {
 
 final academyControllerProvider =
     AsyncNotifierProvider<AcademyController, AcademyViewState>(
-  AcademyController.new,
-);
+      AcademyController.new,
+    );
 
 class AcademyController extends AsyncNotifier<AcademyViewState> {
   AcademySubTab _activeTab = AcademySubTab.placementWaiting;

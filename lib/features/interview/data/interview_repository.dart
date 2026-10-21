@@ -16,19 +16,34 @@ final interviewRepositoryProvider = Provider<InterviewRepository>((ref) {
 
 class InterviewRepository {
   const InterviewRepository({required HkJobsApiClient apiClient})
-      : _apiClient = apiClient;
+    : _apiClient = apiClient;
 
   final HkJobsApiClient _apiClient;
 
   Future<Result<PaginatedList<InterviewScheduleItem>>> fetchSchedules({
     required AdminSession? session,
+    String? branchId,
+    String? startDate,
+    String? endDate,
     String searchQuery = '',
     int page = 1,
     int limit = 20,
   }) async {
-    final endpoint = session?.role == AdminRole.interviewer
-        ? ApiEndpoints.interviewerScheduleTable(session!.adminId)
-        : ApiEndpoints.interviewListTable;
+    final String endpoint;
+    if (session?.role == AdminRole.interviewer) {
+      endpoint = ApiEndpoints.interviewerScheduleTable(session!.adminId);
+    } else if (startDate != null &&
+        endDate != null &&
+        startDate.isNotEmpty &&
+        endDate.isNotEmpty) {
+      endpoint = ApiEndpoints.interviewFilterTable(
+        cabang: (branchId != null && branchId.isNotEmpty) ? branchId : 'All',
+        startDate: startDate,
+        endDate: endDate,
+      );
+    } else {
+      endpoint = ApiEndpoints.interviewListTable;
+    }
 
     final start = (page - 1) * limit;
     final res = await _apiClient.fetchDataTable(
@@ -41,8 +56,9 @@ class InterviewRepository {
       case Failure<ParsedDataTableResult>(:final error):
         return Failure<PaginatedList<InterviewScheduleItem>>(error);
       case Success<ParsedDataTableResult>(:final data):
-        final items =
-            data.rows.map(InterviewScheduleItem.fromDataTableRow).toList();
+        final items = data.rows
+            .map(InterviewScheduleItem.fromDataTableRow)
+            .toList();
         return Success<PaginatedList<InterviewScheduleItem>>(
           PaginatedList<InterviewScheduleItem>(
             totalCount: data.totalRecords,
@@ -54,7 +70,8 @@ class InterviewRepository {
     }
   }
 
-  Future<Result<PaginatedList<InterviewCandidateItem>>> fetchInterviewParticipants(
+  Future<Result<PaginatedList<InterviewCandidateItem>>>
+  fetchInterviewParticipants(
     String interviewId, {
     String searchQuery = '',
     String vacancyCode = '',
@@ -75,8 +92,7 @@ class InterviewRepository {
       case Success<ParsedDataTableResult>(:final data):
         final items = data.rows
             .map(
-              (row) =>
-                  InterviewCandidateItem.fromScheduleParticipantsTableRow(
+              (row) => InterviewCandidateItem.fromScheduleParticipantsTableRow(
                 row,
                 fallbackVacancyCode: vacancyCode,
                 fallbackInterviewCode: interviewCode,
@@ -119,8 +135,9 @@ class InterviewRepository {
       case Failure<ParsedDataTableResult>(:final error):
         return Failure<PaginatedList<InterviewCandidateItem>>(error);
       case Success<ParsedDataTableResult>(:final data):
-        final items =
-            data.rows.map(InterviewCandidateItem.fromDataTableRow).toList();
+        final items = data.rows
+            .map(InterviewCandidateItem.fromDataTableRow)
+            .toList();
         return Success<PaginatedList<InterviewCandidateItem>>(
           PaginatedList<InterviewCandidateItem>(
             totalCount: data.totalRecords,
@@ -159,15 +176,17 @@ class InterviewRepository {
           'id_cabang': (data['id_branch_advert'] ?? '').toString(),
           'id_user_applicant': (data['id_user_applicant'] ?? '').toString(),
           'id_interview': (data['id_schedule_interview'] ?? '').toString(),
-          'data_diri_verification':
-              rubric.dataDiriSesuai ? 'Sesuai' : 'Tidak Sesuai',
+          'data_diri_verification': rubric.dataDiriSesuai
+              ? 'Sesuai'
+              : 'Tidak Sesuai',
           'fisik_verification': rubric.fisikSesuai ? 'Sesuai' : 'Tidak Sesuai',
-          'pengalaman_verification':
-              rubric.pengalamanAda ? 'Ada' : 'Tidak Ada',
-          'pengalaman_sesuai':
-              rubric.pengalamanSesuai ? 'Sesuai' : 'Tidak Sesuai',
-          'ijazah_verification':
-              rubric.ijazahSesuai ? 'Sesuai' : 'Tidak Sesuai',
+          'pengalaman_verification': rubric.pengalamanAda ? 'Ada' : 'Tidak Ada',
+          'pengalaman_sesuai': rubric.pengalamanSesuai
+              ? 'Sesuai'
+              : 'Tidak Sesuai',
+          'ijazah_verification': rubric.ijazahSesuai
+              ? 'Sesuai'
+              : 'Tidak Sesuai',
           'skck_verification': rubric.skckSesuai ? 'Sesuai' : 'Tidak Sesuai',
           'sio_verification': rubric.sioSesuai ? 'Sesuai' : 'Tidak Sesuai',
           'groomingRate': rubric.groomingRate.toString(),

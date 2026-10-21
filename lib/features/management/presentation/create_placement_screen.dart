@@ -26,8 +26,9 @@ class _CreatePlacementScreenState extends ConsumerState<CreatePlacementScreen> {
   final TextEditingController _lokasiProjectController =
       TextEditingController();
   Set<String> _selectedPosition = <String>{};
-  final TextEditingController _quotaController =
-      TextEditingController(text: '1');
+  final TextEditingController _quotaController = TextEditingController(
+    text: '1',
+  );
   String? _date;
   String? _timeStart = '08:00';
   String? _timeEnd = '17:00';
@@ -46,18 +47,22 @@ class _CreatePlacementScreenState extends ConsumerState<CreatePlacementScreen> {
     if (!(_formKey.currentState?.validate() ?? false)) return;
 
     if (_selectedProject.isEmpty) {
-      setState(() =>
-          _submitError = FormStrings.required(FormStrings.placementProject));
+      setState(
+        () => _submitError = FormStrings.required(FormStrings.placementProject),
+      );
       return;
     }
     if (_selectedPosition.isEmpty) {
-      setState(() =>
-          _submitError = FormStrings.required(FormStrings.placementPosition));
+      setState(
+        () =>
+            _submitError = FormStrings.required(FormStrings.placementPosition),
+      );
       return;
     }
     if (_date == null || _date!.isEmpty) {
-      setState(() =>
-          _submitError = FormStrings.required(FormStrings.placementDate));
+      setState(
+        () => _submitError = FormStrings.required(FormStrings.placementDate),
+      );
       return;
     }
 
@@ -82,8 +87,9 @@ class _CreatePlacementScreenState extends ConsumerState<CreatePlacementScreen> {
       timeEnd: _timeEnd ?? '17:00',
     );
 
-    final res =
-        await ref.read(managementRepositoryProvider).createPlacement(draft);
+    final res = await ref
+        .read(managementRepositoryProvider)
+        .createPlacement(draft);
 
     if (!mounted) return;
 
@@ -91,9 +97,9 @@ class _CreatePlacementScreenState extends ConsumerState<CreatePlacementScreen> {
 
     switch (res) {
       case Success<void>():
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text(FormStrings.savedSuccess)),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text(FormStrings.savedSuccess)));
         context.pop(true);
       case Failure<void>(:final error):
         setState(() => _submitError = error.message);
@@ -102,17 +108,15 @@ class _CreatePlacementScreenState extends ConsumerState<CreatePlacementScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final selectsAsync =
-        ref.watch(formSelectsProvider(ApiEndpoints.placementScheduleForm));
+    final selectsAsync = ref.watch(
+      formSelectsProvider(ApiEndpoints.placementScheduleForm),
+    );
     final colors = context.colors;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text(FormStrings.createPlacementTitle),
-      ),
+      appBar: AppBar(title: const Text(FormStrings.createPlacementTitle)),
       body: selectsAsync.when(
-        loading: () =>
-            const HkLoadingView(message: FormStrings.loadingForm),
+        loading: () => const HkLoadingView(message: FormStrings.loadingForm),
         error: (err, _) => HkErrorView(
           message: err.toString(),
           onRetry: () => ref.invalidate(
@@ -121,7 +125,8 @@ class _CreatePlacementScreenState extends ConsumerState<CreatePlacementScreen> {
         ),
         data: (selects) {
           final projectOptions = selects['projectId'] ?? const <SelectOption>[];
-          final positionOptions = selects['positionId'] ?? const <SelectOption>[];
+          final positionOptions =
+              selects['positionId'] ?? const <SelectOption>[];
 
           return Form(
             key: _formKey,
@@ -173,8 +178,11 @@ class _CreatePlacementScreenState extends ConsumerState<CreatePlacementScreen> {
                   onChanged: (v) {
                     setState(() {
                       _selectedProject = v;
-                      if (v.isNotEmpty && _lokasiProjectController.text.isEmpty) {
-                        final matched = projectOptions.where((p) => p.value == v.first);
+                      if (v.isNotEmpty &&
+                          _lokasiProjectController.text.isEmpty) {
+                        final matched = projectOptions.where(
+                          (p) => p.value == v.first,
+                        );
                         if (matched.isNotEmpty) {
                           _lokasiProjectController.text = matched.first.label;
                         }
@@ -188,11 +196,14 @@ class _CreatePlacementScreenState extends ConsumerState<CreatePlacementScreen> {
                   maxLines: 3,
                   decoration: const InputDecoration(
                     labelText: FormStrings.placementLocation,
-                    hintText: 'Tuliskan nama area, gedung, atau alamat proyek...',
+                    hintText:
+                        'Tuliskan nama area, gedung, atau alamat proyek...',
                   ),
                   validator: (v) {
                     if (v == null || v.trim().isEmpty) {
-                      return FormStrings.required(FormStrings.placementLocation);
+                      return FormStrings.required(
+                        FormStrings.placementLocation,
+                      );
                     }
                     return null;
                   },
@@ -202,8 +213,7 @@ class _CreatePlacementScreenState extends ConsumerState<CreatePlacementScreen> {
                   label: FormStrings.placementPosition,
                   options: positionOptions,
                   selected: _selectedPosition,
-                  onChanged: (v) =>
-                      setState(() => _selectedPosition = v),
+                  onChanged: (v) => setState(() => _selectedPosition = v),
                 ),
                 const SizedBox(height: 14),
                 TextFormField(

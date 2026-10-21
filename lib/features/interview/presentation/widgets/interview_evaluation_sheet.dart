@@ -12,7 +12,10 @@ class InterviewEvaluationSheet extends ConsumerStatefulWidget {
 
   final InterviewCandidateItem candidate;
 
-  static Future<bool?> show(BuildContext context, {required InterviewCandidateItem candidate}) {
+  static Future<bool?> show(
+    BuildContext context, {
+    required InterviewCandidateItem candidate,
+  }) {
     return showModalBottomSheet<bool>(
       context: context,
       isScrollControlled: true,

@@ -20,7 +20,11 @@ class ApplicantProfileBottomSheet extends ConsumerWidget {
   final String applicantId;
   final String initialName;
 
-  static void show(BuildContext context, {required String applicantId, required String initialName}) {
+  static void show(
+    BuildContext context, {
+    required String applicantId,
+    required String initialName,
+  }) {
     showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
@@ -50,13 +54,14 @@ class ApplicantProfileBottomSheet extends ConsumerWidget {
         final result = snapshot.data!;
         return switch (result) {
           Failure<ApplicantFullProfile>(:final error) => SizedBox(
-              height: 320,
-              child: HkErrorView(
-                message: error.message,
-                onRetry: () => Navigator.of(context).pop(),
-              ),
+            height: 320,
+            child: HkErrorView(
+              message: error.message,
+              onRetry: () => Navigator.of(context).pop(),
             ),
-          Success<ApplicantFullProfile>(:final data) => DraggableScrollableSheet(
+          ),
+          Success<ApplicantFullProfile>(:final data) =>
+            DraggableScrollableSheet(
               expand: false,
               initialChildSize: 0.85,
               minChildSize: 0.5,
@@ -99,7 +104,8 @@ class ApplicantProfileBottomSheet extends ConsumerWidget {
                       HkWhatsAppButton(
                         phone: data.phone,
                         candidateName: data.fullName,
-                        contextDescription: 'lamaran posisi ${data.positionName}',
+                        contextDescription:
+                            'lamaran posisi ${data.positionName}',
                         label: 'Chat WhatsApp Pelamar',
                       ),
                     ],
@@ -178,10 +184,7 @@ class _ProfileInfoGrid extends StatelessWidget {
                   children: [
                     SizedBox(
                       width: 130,
-                      child: Text(
-                        pair.$1,
-                        style: context.textStyles.bodySmall,
-                      ),
+                      child: Text(pair.$1, style: context.textStyles.bodySmall),
                     ),
                     Expanded(
                       child: Row(
@@ -216,10 +219,7 @@ class _ProfileInfoGrid extends StatelessWidget {
 }
 
 class _DocumentPreviewCard extends StatelessWidget {
-  const _DocumentPreviewCard({
-    required this.label,
-    required this.imageUrl,
-  });
+  const _DocumentPreviewCard({required this.label, required this.imageUrl});
 
   final String label;
   final String imageUrl;

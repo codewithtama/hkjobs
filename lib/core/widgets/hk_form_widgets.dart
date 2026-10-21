@@ -139,8 +139,9 @@ class _PickerSheetState extends State<_PickerSheet> {
                                     color: context.colors.accent,
                                   )
                                 : null,
-                            onTap: () => Navigator.of(context)
-                                .pop(<String>{option.value}),
+                            onTap: () => Navigator.of(
+                              context,
+                            ).pop(<String>{option.value}),
                           );
                         },
                       ),

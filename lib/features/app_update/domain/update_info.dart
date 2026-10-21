@@ -28,7 +28,10 @@ class UpdateInfo {
     String currentBuild = '0',
   }) {
     final cleanLatest = latestTag.trim().replaceFirst(RegExp(r'^[vV]'), '');
-    final cleanCurrent = currentVersion.trim().replaceFirst(RegExp(r'^[vV]'), '');
+    final cleanCurrent = currentVersion.trim().replaceFirst(
+      RegExp(r'^[vV]'),
+      '',
+    );
 
     final latestParts = cleanLatest.split('+');
     final latestSemVer = latestParts.first;
@@ -73,11 +76,13 @@ class UpdateInfo {
   }) {
     final tagName = (json['tag_name'] ?? json['name'] ?? '').toString();
     final releaseTitle = (json['name'] ?? tagName).toString();
-    final releaseNotes = (json['body'] ?? 'Tidak ada catatan rilis.').toString();
+    final releaseNotes = (json['body'] ?? 'Tidak ada catatan rilis.')
+        .toString();
     final htmlUrl = (json['html_url'] ?? '').toString();
     final publishedAtStr = json['published_at']?.toString();
-    final publishedAt =
-        publishedAtStr != null ? DateTime.tryParse(publishedAtStr) : null;
+    final publishedAt = publishedAtStr != null
+        ? DateTime.tryParse(publishedAtStr)
+        : null;
 
     String? apkDownloadUrl;
     final rawAssets = json['assets'];
@@ -122,8 +127,8 @@ class UpdateInfo {
     final buildNumber = (json['buildNumber'] ?? '0').toString();
     final tagName = version.isNotEmpty
         ? (version.startsWith('v') || version.startsWith('V')
-            ? version
-            : 'v$version')
+              ? version
+              : 'v$version')
         : '';
     final combinedLatestTag = buildNumber.isNotEmpty && buildNumber != '0'
         ? '$tagName+$buildNumber'
@@ -134,8 +139,9 @@ class UpdateInfo {
     final apkUrl = (json['apkUrl'] ?? '').toString();
     final htmlUrl = (json['htmlUrl'] ?? '').toString();
     final publishedAtStr = json['publishedAt']?.toString();
-    final publishedAt =
-        publishedAtStr != null ? DateTime.tryParse(publishedAtStr) : null;
+    final publishedAt = publishedAtStr != null
+        ? DateTime.tryParse(publishedAtStr)
+        : null;
 
     final hasUpdate = isVersionNewer(
       latestTag: combinedLatestTag,

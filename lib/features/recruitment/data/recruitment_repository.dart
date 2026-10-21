@@ -33,18 +33,32 @@ class PaginatedList<T> {
 
 class RecruitmentRepository {
   const RecruitmentRepository({required HkJobsApiClient apiClient})
-      : _apiClient = apiClient;
+    : _apiClient = apiClient;
 
   final HkJobsApiClient _apiClient;
 
   Future<Result<PaginatedList<JobVacancyItem>>> fetchVacancies({
     String searchQuery = '',
+    String? branchId,
+    String? startDate,
+    String? endDate,
     int page = 1,
     int limit = 20,
   }) async {
     final start = (page - 1) * limit;
+    final endpoint =
+        (startDate != null &&
+            endDate != null &&
+            startDate.isNotEmpty &&
+            endDate.isNotEmpty)
+        ? ApiEndpoints.advertisementFilterTable(
+            cabang: (branchId != null && branchId.isNotEmpty) ? branchId : '1',
+            startDate: startDate,
+            endDate: endDate,
+          )
+        : ApiEndpoints.advertisementListTable;
     final res = await _apiClient.fetchDataTable(
-      endpoint: ApiEndpoints.advertisementListTable,
+      endpoint: endpoint,
       start: start,
       length: limit,
       searchQuery: searchQuery,
@@ -68,6 +82,7 @@ class RecruitmentRepository {
   Future<Result<PaginatedList<VacancyApplicationItem>>> fetchVacancyApplicants(
     String advertId, {
     String searchQuery = '',
+    String vacancyCode = '',
     int page = 1,
     int limit = 20,
   }) async {
@@ -83,7 +98,12 @@ class RecruitmentRepository {
         return Failure<PaginatedList<VacancyApplicationItem>>(error);
       case Success<ParsedDataTableResult>(:final data):
         final items = data.rows
-            .map(VacancyApplicationItem.fromVacancyApplicantsTableRow)
+            .map(
+              (row) => VacancyApplicationItem.fromVacancyApplicantsTableRow(
+                row,
+                fallbackVacancyCode: vacancyCode,
+              ),
+            )
             .toList();
         return Success<PaginatedList<VacancyApplicationItem>>(
           PaginatedList<VacancyApplicationItem>(
@@ -104,17 +124,14 @@ class RecruitmentRepository {
   }) async {
     final (String endpoint, String defaultStatus) = switch (tab) {
       RecruitmentSubTab.approved => (
-          ApiEndpoints.advertisementApprovedTable,
-          'Diterima',
-        ),
+        ApiEndpoints.advertisementApprovedTable,
+        'Diterima',
+      ),
       RecruitmentSubTab.rejected => (
-          ApiEndpoints.advertisementNotApprovedTable,
-          'Ditolak',
-        ),
-      _ => (
-          ApiEndpoints.advertisementOnProcessTable,
-          'On Process',
-        ),
+        ApiEndpoints.advertisementNotApprovedTable,
+        'Ditolak',
+      ),
+      _ => (ApiEndpoints.advertisementOnProcessTable, 'On Process'),
     };
 
     final start = (page - 1) * limit;
@@ -149,13 +166,19 @@ class RecruitmentRepository {
 
   Future<Result<PaginatedList<MasterApplicantItem>>> fetchMasterApplicants({
     required bool isExisting,
+    String? experienceFilter,
     String searchQuery = '',
     int page = 1,
     int limit = 20,
   }) async {
-    final endpoint = isExisting
-        ? ApiEndpoints.applicantExistingTable
-        : ApiEndpoints.applicantNewComerTable;
+    final endpoint =
+        (experienceFilter != null &&
+            experienceFilter.isNotEmpty &&
+            experienceFilter != 'Semua')
+        ? ApiEndpoints.applicantFilterTable(experienceFilter)
+        : (isExisting
+              ? ApiEndpoints.applicantExistingTable
+              : ApiEndpoints.applicantNewComerTable);
     final start = (page - 1) * limit;
     final res = await _apiClient.fetchDataTable(
       endpoint: endpoint,

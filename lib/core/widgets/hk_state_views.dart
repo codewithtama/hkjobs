@@ -4,10 +4,7 @@ import '../constants/app_strings.dart';
 import '../theme/app_theme.dart';
 
 class HkLoadingView extends StatelessWidget {
-  const HkLoadingView({
-    required this.message,
-    super.key,
-  });
+  const HkLoadingView({required this.message, super.key});
 
   final String message;
 
@@ -44,11 +41,7 @@ class HkLoadingView extends StatelessWidget {
 }
 
 class HkErrorView extends StatelessWidget {
-  const HkErrorView({
-    required this.message,
-    required this.onRetry,
-    super.key,
-  });
+  const HkErrorView({required this.message, required this.onRetry, super.key});
 
   final String message;
   final VoidCallback onRetry;
@@ -69,11 +62,7 @@ class HkErrorView extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(
-                Icons.cloud_off_rounded,
-                size: 36,
-                color: colors.danger,
-              ),
+              Icon(Icons.cloud_off_rounded, size: 36, color: colors.danger),
               const SizedBox(height: 12),
               Text(
                 message,
@@ -113,11 +102,7 @@ class HkEmptyView extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
-              Icons.inbox_outlined,
-              size: 40,
-              color: colors.textMuted,
-            ),
+            Icon(Icons.inbox_outlined, size: 40, color: colors.textMuted),
             const SizedBox(height: 12),
             Text(
               title,
@@ -233,10 +218,7 @@ class HkSearchField extends StatelessWidget {
             if (value.text.isEmpty) {
               return IconButton(
                 onPressed: () => onSubmitted(controller.text),
-                icon: Icon(
-                  Icons.arrow_forward_rounded,
-                  color: colors.accent,
-                ),
+                icon: Icon(Icons.arrow_forward_rounded, color: colors.accent),
               );
             }
             return IconButton(

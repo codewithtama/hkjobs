@@ -35,10 +35,7 @@ class WhatsAppLauncher {
   }
 
   /// Builds a standard WhatsApp URL using wa.me or deep link.
-  static Uri? buildWhatsAppUri({
-    required String phone,
-    String? message,
-  }) {
+  static Uri? buildWhatsAppUri({required String phone, String? message}) {
     final normalized = normalizeIndonesianPhone(phone);
     if (normalized == null) return null;
 
@@ -68,7 +65,9 @@ class WhatsAppLauncher {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: const Text('Nomor WhatsApp pelamar tidak valid atau belum terdaftar.'),
+            content: const Text(
+              'Nomor WhatsApp pelamar tidak valid atau belum terdaftar.',
+            ),
             backgroundColor: context.colors.danger,
           ),
         );
@@ -83,7 +82,8 @@ class WhatsAppLauncher {
       final name = (candidateName != null && candidateName.trim().isNotEmpty)
           ? candidateName.trim()
           : 'Kandidat';
-      final extra = (contextDescription != null && contextDescription.trim().isNotEmpty)
+      final extra =
+          (contextDescription != null && contextDescription.trim().isNotEmpty)
           ? ' terkait $contextDescription'
           : '';
       message =

@@ -12,10 +12,7 @@ final dashboardRepositoryProvider = Provider<DashboardRepository>((ref) {
 });
 
 class _CachedDashboardEntry {
-  const _CachedDashboardEntry({
-    required this.summary,
-    required this.expiresAt,
-  });
+  const _CachedDashboardEntry({required this.summary, required this.expiresAt});
 
   final DashboardSummary summary;
   final DateTime expiresAt;
@@ -25,7 +22,7 @@ class _CachedDashboardEntry {
 
 class DashboardRepository {
   DashboardRepository({required HkJobsApiClient apiClient})
-      : _apiClient = apiClient;
+    : _apiClient = apiClient;
 
   final HkJobsApiClient _apiClient;
   final Map<String, _CachedDashboardEntry> _cache =
@@ -48,10 +45,7 @@ class DashboardRepository {
 
     final rawResult = await _apiClient.postFormRaw(
       ApiEndpoints.dashboardFilter,
-      <String, Object?>{
-        'tgl1': startDate,
-        'tgl2': endDate,
-      },
+      <String, Object?>{'tgl1': startDate, 'tgl2': endDate},
     );
 
     switch (rawResult) {

@@ -6,8 +6,8 @@ import '../domain/dashboard_summary.dart';
 
 final dashboardControllerProvider =
     AsyncNotifierProvider<DashboardController, DashboardSummary>(
-  DashboardController.new,
-);
+      DashboardController.new,
+    );
 
 class DashboardController extends AsyncNotifier<DashboardSummary> {
   String _startDate = '2020-01-01';

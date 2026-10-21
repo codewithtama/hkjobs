@@ -30,9 +30,7 @@ class _CreateInterviewScreenState extends ConsumerState<CreateInterviewScreen> {
   String? _timeStart = '08:00';
   String? _timeEnd = '17:00';
 
-  final List<QuotaRowDraft> _quotas = [
-    QuotaRowDraft(),
-  ];
+  final List<QuotaRowDraft> _quotas = [QuotaRowDraft()];
 
   bool _isLoadingLocation = false;
   bool _isSubmitting = false;
@@ -48,7 +46,9 @@ class _CreateInterviewScreenState extends ConsumerState<CreateInterviewScreen> {
 
     setState(() => _isLoadingLocation = true);
 
-    final res = await ref.read(managementRepositoryProvider).loadLocationInfo(
+    final res = await ref
+        .read(managementRepositoryProvider)
+        .loadLocationInfo(
           endpoint: ApiEndpoints.interviewLocationDetail,
           locationId: selection.first,
         );
@@ -77,15 +77,22 @@ class _CreateInterviewScreenState extends ConsumerState<CreateInterviewScreen> {
     if (!(_formKey.currentState?.validate() ?? false)) return;
 
     if (_selectedVacancy.isEmpty) {
-      setState(() => _submitError = FormStrings.required(FormStrings.interviewVacancy));
+      setState(
+        () => _submitError = FormStrings.required(FormStrings.interviewVacancy),
+      );
       return;
     }
     if (_selectedLocation.isEmpty) {
-      setState(() => _submitError = FormStrings.required(FormStrings.interviewLocation));
+      setState(
+        () =>
+            _submitError = FormStrings.required(FormStrings.interviewLocation),
+      );
       return;
     }
     if (_date == null || _date!.isEmpty) {
-      setState(() => _submitError = FormStrings.required(FormStrings.interviewDate));
+      setState(
+        () => _submitError = FormStrings.required(FormStrings.interviewDate),
+      );
       return;
     }
 
@@ -111,8 +118,9 @@ class _CreateInterviewScreenState extends ConsumerState<CreateInterviewScreen> {
       quotas: validQuotas,
     );
 
-    final res =
-        await ref.read(managementRepositoryProvider).createInterview(draft);
+    final res = await ref
+        .read(managementRepositoryProvider)
+        .createInterview(draft);
 
     if (!mounted) return;
 
@@ -140,17 +148,15 @@ class _CreateInterviewScreenState extends ConsumerState<CreateInterviewScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final selectsAsync =
-        ref.watch(formSelectsProvider(ApiEndpoints.interviewCreate));
+    final selectsAsync = ref.watch(
+      formSelectsProvider(ApiEndpoints.interviewCreate),
+    );
     final colors = context.colors;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text(FormStrings.createInterviewTitle),
-      ),
+      appBar: AppBar(title: const Text(FormStrings.createInterviewTitle)),
       body: selectsAsync.when(
-        loading: () =>
-            const HkLoadingView(message: FormStrings.loadingForm),
+        loading: () => const HkLoadingView(message: FormStrings.loadingForm),
         error: (err, _) => HkErrorView(
           message: err.toString(),
           onRetry: () =>
@@ -279,9 +285,9 @@ class _CreateInterviewScreenState extends ConsumerState<CreateInterviewScreen> {
                           child: CircularProgressIndicator(strokeWidth: 2),
                         )
                       : const Icon(Icons.save_rounded),
-                  label: Text(_isSubmitting
-                      ? FormStrings.saving
-                      : FormStrings.save),
+                  label: Text(
+                    _isSubmitting ? FormStrings.saving : FormStrings.save,
+                  ),
                 ),
                 const SizedBox(height: 32),
               ],

@@ -21,8 +21,8 @@ class AuthRepository {
   const AuthRepository({
     required HkJobsApiClient apiClient,
     required SecureSessionStorage storage,
-  })  : _apiClient = apiClient,
-        _storage = storage;
+  }) : _apiClient = apiClient,
+       _storage = storage;
 
   final HkJobsApiClient _apiClient;
   final SecureSessionStorage _storage;
@@ -85,9 +85,7 @@ class AuthRepository {
       if (parsed['isLoginPage'] == 'true') {
         _apiClient.clearMemoryCookie();
         return const Failure<AdminSession>(
-          ValidationFailure(
-            'Nomor telepon atau kata sandi tidak sesuai.',
-          ),
+          ValidationFailure('Nomor telepon atau kata sandi tidak sesuai.'),
         );
       }
 

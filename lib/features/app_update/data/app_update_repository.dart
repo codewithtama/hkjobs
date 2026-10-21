@@ -14,17 +14,18 @@ class AppUpdateRepository {
     Dio? dio,
     this.owner = 'codewithtama',
     this.repo = 'hkjobs',
-  }) : _dio = dio ??
-            Dio(
-              BaseOptions(
-                connectTimeout: const Duration(seconds: 10),
-                receiveTimeout: const Duration(seconds: 10),
-                headers: <String, String>{
-                  'Accept': 'application/vnd.github.v3+json',
-                  'User-Agent': 'HKJobs-Mobile-App',
-                },
-              ),
-            );
+  }) : _dio =
+           dio ??
+           Dio(
+             BaseOptions(
+               connectTimeout: const Duration(seconds: 10),
+               receiveTimeout: const Duration(seconds: 10),
+               headers: <String, String>{
+                 'Accept': 'application/vnd.github.v3+json',
+                 'User-Agent': 'HKJobs-Mobile-App',
+               },
+             ),
+           );
 
   final Dio _dio;
   final String owner;
@@ -116,9 +117,7 @@ class AppUpdateRepository {
       final url = 'https://api.github.com/repos/$owner/$repo/releases/latest';
       final response = await _dio.get<Map<String, Object?>>(
         url,
-        options: Options(
-          validateStatus: (status) => status == 200,
-        ),
+        options: Options(validateStatus: (status) => status == 200),
       );
 
       final data = response.data;
@@ -142,15 +141,19 @@ class AppUpdateRepository {
       final currentBuild = packageInfo.buildNumber;
 
       // 1. Cek dari manifest CDN Fastly (raw.githubusercontent.com) - Bebas kuota rate limit 403
-      final manifestInfo =
-          await _checkFromManifest(currentVersion, currentBuild);
+      final manifestInfo = await _checkFromManifest(
+        currentVersion,
+        currentBuild,
+      );
       if (manifestInfo != null) {
         return Success<UpdateInfo>(manifestInfo);
       }
 
       // 2. Cek dari GitHub Web 302 redirect probe (github.com/releases/latest) - Bebas API rate limit
-      final redirectInfo =
-          await _checkFromWebRedirect(currentVersion, currentBuild);
+      final redirectInfo = await _checkFromWebRedirect(
+        currentVersion,
+        currentBuild,
+      );
       if (redirectInfo != null) {
         return Success<UpdateInfo>(redirectInfo);
       }

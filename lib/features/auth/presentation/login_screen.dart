@@ -13,10 +13,12 @@ class LoginScreen extends ConsumerStatefulWidget {
 }
 
 class _LoginScreenState extends ConsumerState<LoginScreen> {
-  final TextEditingController _phoneController =
-      TextEditingController(text: '62001');
-  final TextEditingController _passwordController =
-      TextEditingController(text: 'pci2025');
+  final TextEditingController _phoneController = TextEditingController(
+    text: '62001',
+  );
+  final TextEditingController _passwordController = TextEditingController(
+    text: 'pci2025',
+  );
   bool _obscurePassword = true;
   String? _errorMessage;
 
@@ -37,7 +39,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   Future<void> _submitLogin() async {
     setState(() => _errorMessage = null);
-    final failure = await ref.read(authControllerProvider.notifier).signIn(
+    final failure = await ref
+        .read(authControllerProvider.notifier)
+        .signIn(
           phone: _phoneController.text,
           password: _passwordController.text,
         );
@@ -138,11 +142,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                 Expanded(
                                   child: Text(
                                     _errorMessage!,
-                                    style:
-                                        context.textStyles.bodySmall?.copyWith(
-                                      color: colors.danger,
-                                      fontWeight: FontWeight.w600,
-                                    ),
+                                    style: context.textStyles.bodySmall
+                                        ?.copyWith(
+                                          color: colors.danger,
+                                          fontWeight: FontWeight.w600,
+                                        ),
                                   ),
                                 ),
                               ],
@@ -286,9 +290,7 @@ class _PresetRoleChip extends StatelessWidget {
         decoration: BoxDecoration(
           color: isSelected ? colors.accentMuted : colors.surfaceCard,
           borderRadius: BorderRadius.circular(8),
-          border: Border.all(
-            color: isSelected ? colors.accent : colors.border,
-          ),
+          border: Border.all(color: isSelected ? colors.accent : colors.border),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,

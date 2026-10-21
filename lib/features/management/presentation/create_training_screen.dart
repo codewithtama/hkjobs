@@ -39,9 +39,7 @@ class _CreateTrainingScreenState extends ConsumerState<CreateTrainingScreen> {
   Set<String> _selectedRank = <String>{};
   Set<String> _selectedPosition = <String>{};
 
-  final List<QuotaRowDraft> _quotas = [
-    QuotaRowDraft(),
-  ];
+  final List<QuotaRowDraft> _quotas = [QuotaRowDraft()];
 
   bool _isLoadingLocation = false;
   bool _isSubmitting = false;
@@ -64,7 +62,9 @@ class _CreateTrainingScreenState extends ConsumerState<CreateTrainingScreen> {
 
     setState(() => _isLoadingLocation = true);
 
-    final res = await ref.read(managementRepositoryProvider).loadLocationInfo(
+    final res = await ref
+        .read(managementRepositoryProvider)
+        .loadLocationInfo(
           endpoint: ApiEndpoints.trainingLocationDetail,
           locationId: selection.first,
         );
@@ -93,27 +93,39 @@ class _CreateTrainingScreenState extends ConsumerState<CreateTrainingScreen> {
     if (!(_formKey.currentState?.validate() ?? false)) return;
 
     if (_selectedBranch.isEmpty) {
-      setState(() => _submitError = FormStrings.required(FormStrings.trainingBranch));
+      setState(
+        () => _submitError = FormStrings.required(FormStrings.trainingBranch),
+      );
       return;
     }
     if (_selectedLocation.isEmpty) {
-      setState(() => _submitError = FormStrings.required(FormStrings.trainingLocation));
+      setState(
+        () => _submitError = FormStrings.required(FormStrings.trainingLocation),
+      );
       return;
     }
     if (_startDate == null || _startDate!.isEmpty) {
-      setState(() => _submitError = FormStrings.required(FormStrings.trainingStart));
+      setState(
+        () => _submitError = FormStrings.required(FormStrings.trainingStart),
+      );
       return;
     }
     if (_endDate == null || _endDate!.isEmpty) {
-      setState(() => _submitError = FormStrings.required(FormStrings.trainingEnd));
+      setState(
+        () => _submitError = FormStrings.required(FormStrings.trainingEnd),
+      );
       return;
     }
     if (_selectedRank.isEmpty) {
-      setState(() => _submitError = FormStrings.required(FormStrings.trainingRank));
+      setState(
+        () => _submitError = FormStrings.required(FormStrings.trainingRank),
+      );
       return;
     }
     if (_selectedPosition.isEmpty) {
-      setState(() => _submitError = FormStrings.required(FormStrings.trainingPosition));
+      setState(
+        () => _submitError = FormStrings.required(FormStrings.trainingPosition),
+      );
       return;
     }
 
@@ -134,7 +146,9 @@ class _CreateTrainingScreenState extends ConsumerState<CreateTrainingScreen> {
       locationId: _selectedLocation.first,
       area: _areaCabang,
       address: _lokasiCabang,
-      customAddress: _useCustomAddress ? _customAddressController.text.trim() : null,
+      customAddress: _useCustomAddress
+          ? _customAddressController.text.trim()
+          : null,
       startDate: _startDate!,
       endDate: _endDate!,
       timeStart: _timeStart ?? '08:00',
@@ -144,8 +158,9 @@ class _CreateTrainingScreenState extends ConsumerState<CreateTrainingScreen> {
       quotas: validQuotas,
     );
 
-    final res =
-        await ref.read(managementRepositoryProvider).createTraining(draft);
+    final res = await ref
+        .read(managementRepositoryProvider)
+        .createTraining(draft);
 
     if (!mounted) return;
 
@@ -173,17 +188,15 @@ class _CreateTrainingScreenState extends ConsumerState<CreateTrainingScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final selectsAsync =
-        ref.watch(formSelectsProvider(ApiEndpoints.trainingCreate));
+    final selectsAsync = ref.watch(
+      formSelectsProvider(ApiEndpoints.trainingCreate),
+    );
     final colors = context.colors;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text(FormStrings.createTrainingTitle),
-      ),
+      appBar: AppBar(title: const Text(FormStrings.createTrainingTitle)),
       body: selectsAsync.when(
-        loading: () =>
-            const HkLoadingView(message: FormStrings.loadingForm),
+        loading: () => const HkLoadingView(message: FormStrings.loadingForm),
         error: (err, _) => HkErrorView(
           message: err.toString(),
           onRetry: () =>
@@ -233,8 +246,10 @@ class _CreateTrainingScreenState extends ConsumerState<CreateTrainingScreen> {
                     hintText: 'Misal: TR-2026-JKT-01',
                     prefixIcon: Icon(Icons.confirmation_number_outlined),
                   ),
-                  validator: (v) =>
-                      FormValidators.requiredText(v ?? '', FormStrings.trainingCode),
+                  validator: (v) => FormValidators.requiredText(
+                    v ?? '',
+                    FormStrings.trainingCode,
+                  ),
                 ),
                 const SizedBox(height: 14),
                 HkPickerField(
@@ -283,9 +298,12 @@ class _CreateTrainingScreenState extends ConsumerState<CreateTrainingScreen> {
                 const SizedBox(height: 12),
                 CheckboxListTile(
                   title: const Text(FormStrings.trainingCustomAddress),
-                  subtitle: const Text('Centang jika pelatihan diadakan di lokasi kustom'),
+                  subtitle: const Text(
+                    'Centang jika pelatihan diadakan di lokasi kustom',
+                  ),
                   value: _useCustomAddress,
-                  onChanged: (v) => setState(() => _useCustomAddress = v ?? false),
+                  onChanged: (v) =>
+                      setState(() => _useCustomAddress = v ?? false),
                   controlAffinity: ListTileControlAffinity.leading,
                   contentPadding: EdgeInsets.zero,
                 ),
@@ -296,10 +314,14 @@ class _CreateTrainingScreenState extends ConsumerState<CreateTrainingScreen> {
                     maxLines: 2,
                     decoration: const InputDecoration(
                       labelText: FormStrings.trainingCustomAddressField,
-                      hintText: 'Tuliskan nama gedung dan detail alamat lokasi training...',
+                      hintText:
+                          'Tuliskan nama gedung dan detail alamat lokasi training...',
                     ),
                     validator: (v) => _useCustomAddress
-                        ? FormValidators.requiredText(v ?? '', FormStrings.trainingCustomAddressField)
+                        ? FormValidators.requiredText(
+                            v ?? '',
+                            FormStrings.trainingCustomAddressField,
+                          )
                         : null,
                   ),
                 ],
@@ -375,9 +397,9 @@ class _CreateTrainingScreenState extends ConsumerState<CreateTrainingScreen> {
                           child: CircularProgressIndicator(strokeWidth: 2),
                         )
                       : const Icon(Icons.save_rounded),
-                  label: Text(_isSubmitting
-                      ? FormStrings.saving
-                      : FormStrings.save),
+                  label: Text(
+                    _isSubmitting ? FormStrings.saving : FormStrings.save,
+                  ),
                 ),
                 const SizedBox(height: 32),
               ],

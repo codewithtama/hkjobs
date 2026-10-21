@@ -31,9 +31,7 @@ class HkPaginationBar extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
         color: colors.surfaceCard,
-        border: Border(
-          top: BorderSide(color: colors.border),
-        ),
+        border: Border(top: BorderSide(color: colors.border)),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -60,8 +58,9 @@ class HkPaginationBar extends StatelessWidget {
                 tooltip: 'Halaman Pertama',
               ),
               IconButton(
-                onPressed:
-                    hasPrev ? () => onPageChanged(currentPage - 1) : null,
+                onPressed: hasPrev
+                    ? () => onPageChanged(currentPage - 1)
+                    : null,
                 icon: const Icon(Icons.chevron_left_rounded),
                 iconSize: 22,
                 visualDensity: VisualDensity.compact,
@@ -69,8 +68,7 @@ class HkPaginationBar extends StatelessWidget {
               ),
               Container(
                 margin: const EdgeInsets.symmetric(horizontal: 4),
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                 decoration: BoxDecoration(
                   color: colors.accentMuted,
                   borderRadius: BorderRadius.circular(6),
@@ -84,8 +82,9 @@ class HkPaginationBar extends StatelessWidget {
                 ),
               ),
               IconButton(
-                onPressed:
-                    hasNext ? () => onPageChanged(currentPage + 1) : null,
+                onPressed: hasNext
+                    ? () => onPageChanged(currentPage + 1)
+                    : null,
                 icon: const Icon(Icons.chevron_right_rounded),
                 iconSize: 22,
                 visualDensity: VisualDensity.compact,

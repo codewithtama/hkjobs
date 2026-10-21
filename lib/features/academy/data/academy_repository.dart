@@ -16,7 +16,7 @@ final academyRepositoryProvider = Provider<AcademyRepository>((ref) {
 
 class AcademyRepository {
   const AcademyRepository({required HkJobsApiClient apiClient})
-      : _apiClient = apiClient;
+    : _apiClient = apiClient;
 
   final HkJobsApiClient _apiClient;
 
@@ -39,8 +39,9 @@ class AcademyRepository {
         return Success<PaginatedList<PlacementWaitingItem>>(
           PaginatedList<PlacementWaitingItem>(
             totalCount: data.totalRecords,
-            items:
-                data.rows.map(PlacementWaitingItem.fromDataTableRow).toList(),
+            items: data.rows
+                .map(PlacementWaitingItem.fromDataTableRow)
+                .toList(),
             page: page,
             pageSize: limit,
           ),
@@ -67,8 +68,9 @@ class AcademyRepository {
         return Success<PaginatedList<PlacementScheduleItem>>(
           PaginatedList<PlacementScheduleItem>(
             totalCount: data.totalRecords,
-            items:
-                data.rows.map(PlacementScheduleItem.fromDataTableRow).toList(),
+            items: data.rows
+                .map(PlacementScheduleItem.fromDataTableRow)
+                .toList(),
             page: page,
             pageSize: limit,
           ),
@@ -122,8 +124,9 @@ class AcademyRepository {
         return Success<PaginatedList<PsikotesQuestionItem>>(
           PaginatedList<PsikotesQuestionItem>(
             totalCount: data.totalRecords,
-            items:
-                data.rows.map(PsikotesQuestionItem.fromDataTableRow).toList(),
+            items: data.rows
+                .map(PsikotesQuestionItem.fromDataTableRow)
+                .toList(),
             page: page,
             pageSize: limit,
           ),
@@ -203,10 +206,8 @@ class AcademyRepository {
     }
   }
 
-  Future<Result<PaginatedList<TrainingScheduleSummaryItem>>> fetchTrainingSchedules({
-    String searchQuery = '',
-    int limit = 40,
-  }) async {
+  Future<Result<PaginatedList<TrainingScheduleSummaryItem>>>
+  fetchTrainingSchedules({String searchQuery = '', int limit = 40}) async {
     final res = await _apiClient.fetchDataTable(
       endpoint: ApiEndpoints.trainingListTable,
       length: limit,
@@ -227,7 +228,8 @@ class AcademyRepository {
     }
   }
 
-  Future<Result<PaginatedList<TrainingParticipantItem>>> fetchTrainingParticipants(
+  Future<Result<PaginatedList<TrainingParticipantItem>>>
+  fetchTrainingParticipants(
     String trainingId, {
     String searchQuery = '',
     int limit = 40,
@@ -319,8 +321,9 @@ class AcademyRepository {
       case Failure<ParsedDataTableResult>(:final error):
         return Failure<PaginatedList<PlacementPersonnelItem>>(error);
       case Success<ParsedDataTableResult>(:final data):
-        final items =
-            data.rows.map(PlacementPersonnelItem.fromDataTableRow).toList();
+        final items = data.rows
+            .map(PlacementPersonnelItem.fromDataTableRow)
+            .toList();
         return Success<PaginatedList<PlacementPersonnelItem>>(
           PaginatedList<PlacementPersonnelItem>(
             totalCount: data.totalRecords,

@@ -50,9 +50,7 @@ abstract final class FormHtmlParser {
         .replaceAll(RegExp(r'<br\s*/?>', caseSensitive: false), '\n')
         .replaceAll(RegExp(r'</p>', caseSensitive: false), '\n');
     final fragment = html_parser.parseFragment(withBreaks);
-    return (fragment.text ?? '')
-        .replaceAll(RegExp(r'\n{3,}'), '\n\n')
-        .trim();
+    return (fragment.text ?? '').replaceAll(RegExp(r'\n{3,}'), '\n\n').trim();
   }
 
   /// Teks polos -> HTML aman untuk kolom deskripsi (CKEditor di web).

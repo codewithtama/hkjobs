@@ -1,9 +1,9 @@
 {
-  "version": "1.0.2",
-  "buildNumber": "6",
-  "title": "Rilis v1.0.2 (Build 6)",
-  "releaseNotes": "Pembaruan rilis otomatis v1.0.2",
-  "apkUrl": "https://github.com/codewithtama/hkjobs/releases/download/v1.0.2/hkjobs-release.apk",
-  "htmlUrl": "https://github.com/codewithtama/hkjobs/releases/tag/v1.0.2",
-  "publishedAt": "2026-10-20T16:55:58Z"
+  "version": "1.0.3",
+  "buildNumber": "8",
+  "title": "Rilis v1.0.3 (Build 8)",
+  "releaseNotes": "Pembaruan v1.0.3: Paritas filter lengkap Web HKJobs, grouping kode lowongan & interview, serta dukungan instalasi update in-app (sumber tidak dikenal).",
+  "apkUrl": "https://github.com/codewithtama/hkjobs/releases/download/v1.0.3/hkjobs-release.apk",
+  "htmlUrl": "https://github.com/codewithtama/hkjobs/releases/tag/v1.0.3",
+  "publishedAt": "2026-10-21T00:00:00Z"
 }

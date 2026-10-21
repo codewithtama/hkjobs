@@ -45,10 +45,7 @@ class HkWhatsAppButton extends StatelessWidget {
       ),
       label: Text(
         label,
-        style: TextStyle(
-          color: colors.success,
-          fontWeight: FontWeight.w700,
-        ),
+        style: TextStyle(color: colors.success, fontWeight: FontWeight.w700),
       ),
       style: OutlinedButton.styleFrom(
         foregroundColor: colors.success,
@@ -58,9 +55,7 @@ class HkWhatsAppButton extends StatelessWidget {
         padding: compact
             ? const EdgeInsets.symmetric(horizontal: 10, vertical: 6)
             : const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       ),
     );
   }
@@ -112,11 +107,7 @@ class HkWhatsAppIconButton extends StatelessWidget {
             constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
             child: Padding(
               padding: const EdgeInsets.all(8),
-              child: Icon(
-                Icons.chat_outlined,
-                size: 18,
-                color: colors.success,
-              ),
+              child: Icon(Icons.chat_outlined, size: 18, color: colors.success),
             ),
           ),
         ),

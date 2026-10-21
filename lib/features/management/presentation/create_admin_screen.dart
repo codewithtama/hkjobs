@@ -51,11 +51,15 @@ class _CreateAdminScreenState extends ConsumerState<CreateAdminScreen> {
     if (!(_formKey.currentState?.validate() ?? false)) return;
 
     if (_selectedRole.isEmpty) {
-      setState(() => _submitError = FormStrings.required(FormStrings.adminRole));
+      setState(
+        () => _submitError = FormStrings.required(FormStrings.adminRole),
+      );
       return;
     }
     if (_selectedBranch.isEmpty) {
-      setState(() => _submitError = FormStrings.required(FormStrings.adminBranch));
+      setState(
+        () => _submitError = FormStrings.required(FormStrings.adminBranch),
+      );
       return;
     }
 
@@ -82,8 +86,7 @@ class _CreateAdminScreenState extends ConsumerState<CreateAdminScreen> {
       photo: _photo,
     );
 
-    final res =
-        await ref.read(managementRepositoryProvider).createAdmin(draft);
+    final res = await ref.read(managementRepositoryProvider).createAdmin(draft);
 
     if (!mounted) return;
 
@@ -111,18 +114,19 @@ class _CreateAdminScreenState extends ConsumerState<CreateAdminScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final selectsAsync = ref.watch(formSelectsProvider(ApiEndpoints.adminCreate));
+    final selectsAsync = ref.watch(
+      formSelectsProvider(ApiEndpoints.adminCreate),
+    );
     final colors = context.colors;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text(FormStrings.createAdminTitle),
-      ),
+      appBar: AppBar(title: const Text(FormStrings.createAdminTitle)),
       body: selectsAsync.when(
         loading: () => const HkLoadingView(message: FormStrings.loadingForm),
         error: (err, _) => HkErrorView(
           message: err.toString(),
-          onRetry: () => ref.invalidate(formSelectsProvider(ApiEndpoints.adminCreate)),
+          onRetry: () =>
+              ref.invalidate(formSelectsProvider(ApiEndpoints.adminCreate)),
         ),
         data: (selects) {
           final roleOptions = selects['roleAdmin'] ?? const <SelectOption>[];
@@ -163,8 +167,10 @@ class _CreateAdminScreenState extends ConsumerState<CreateAdminScreen> {
                     labelText: FormStrings.adminName,
                     prefixIcon: Icon(Icons.person_outline),
                   ),
-                  validator: (v) =>
-                      FormValidators.requiredText(v ?? '', FormStrings.adminName),
+                  validator: (v) => FormValidators.requiredText(
+                    v ?? '',
+                    FormStrings.adminName,
+                  ),
                 ),
                 const SizedBox(height: 14),
                 TextFormField(
@@ -174,8 +180,10 @@ class _CreateAdminScreenState extends ConsumerState<CreateAdminScreen> {
                     labelText: FormStrings.adminEmail,
                     prefixIcon: Icon(Icons.email_outlined),
                   ),
-                  validator: (v) =>
-                      FormValidators.requiredText(v ?? '', FormStrings.adminEmail),
+                  validator: (v) => FormValidators.requiredText(
+                    v ?? '',
+                    FormStrings.adminEmail,
+                  ),
                 ),
                 const SizedBox(height: 14),
                 TextFormField(
@@ -185,8 +193,10 @@ class _CreateAdminScreenState extends ConsumerState<CreateAdminScreen> {
                     labelText: FormStrings.adminPhone,
                     prefixIcon: Icon(Icons.phone_outlined),
                   ),
-                  validator: (v) =>
-                      FormValidators.requiredText(v ?? '', FormStrings.adminPhone),
+                  validator: (v) => FormValidators.requiredText(
+                    v ?? '',
+                    FormStrings.adminPhone,
+                  ),
                 ),
                 const SizedBox(height: 14),
                 TextFormField(
@@ -196,8 +206,10 @@ class _CreateAdminScreenState extends ConsumerState<CreateAdminScreen> {
                     labelText: FormStrings.adminPassword,
                     prefixIcon: Icon(Icons.lock_outline),
                   ),
-                  validator: (v) =>
-                      FormValidators.requiredText(v ?? '', FormStrings.adminPassword),
+                  validator: (v) => FormValidators.requiredText(
+                    v ?? '',
+                    FormStrings.adminPassword,
+                  ),
                 ),
                 const SizedBox(height: 14),
                 TextFormField(
@@ -264,9 +276,9 @@ class _CreateAdminScreenState extends ConsumerState<CreateAdminScreen> {
                           child: CircularProgressIndicator(strokeWidth: 2),
                         )
                       : const Icon(Icons.save_rounded),
-                  label: Text(_isSubmitting
-                      ? FormStrings.saving
-                      : FormStrings.save),
+                  label: Text(
+                    _isSubmitting ? FormStrings.saving : FormStrings.save,
+                  ),
                 ),
                 const SizedBox(height: 32),
               ],

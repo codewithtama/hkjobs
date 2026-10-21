@@ -78,6 +78,7 @@ class VacancyApplicationItem {
     required this.applyDate,
     required this.documentUrls,
     required this.statusText,
+    this.vacancyCode = '',
   });
 
   final String userAdvertId;
@@ -98,6 +99,7 @@ class VacancyApplicationItem {
   final String applyDate;
   final List<String> documentUrls;
   final String statusText;
+  final String vacancyCode;
 
   factory VacancyApplicationItem.fromDataTableRow(
     Map<String, Object?> row, {
@@ -106,8 +108,8 @@ class VacancyApplicationItem {
     final rowId = (row['DT_RowId'] ?? '').toString();
     final extractedAppId =
         HtmlCellParser.extractFirstFunctionArg(row['1'], 'editShowPelamar') ??
-            HtmlCellParser.extractTrailingPathId(row['1']) ??
-            rowId;
+        HtmlCellParser.extractTrailingPathId(row['1']) ??
+        rowId;
 
     return VacancyApplicationItem(
       userAdvertId: rowId,
@@ -130,18 +132,22 @@ class VacancyApplicationItem {
       statusText: row.containsKey('22')
           ? HtmlCellParser.stripHtml(row['22'])
           : defaultStatus,
+      vacancyCode: row.containsKey('26')
+          ? HtmlCellParser.stripHtml(row['26'])
+          : '',
     );
   }
 
   factory VacancyApplicationItem.fromVacancyApplicantsTableRow(
     Map<String, Object?> row, {
     String defaultStatus = 'On Process',
+    String fallbackVacancyCode = '',
   }) {
     final rowId = (row['DT_RowId'] ?? '').toString();
     final extractedAppId =
         HtmlCellParser.extractFirstFunctionArg(row['1'], 'editShowPelamar') ??
-            HtmlCellParser.extractTrailingPathId(row['1']) ??
-            rowId;
+        HtmlCellParser.extractTrailingPathId(row['1']) ??
+        rowId;
 
     return VacancyApplicationItem(
       userAdvertId: rowId,
@@ -164,6 +170,11 @@ class VacancyApplicationItem {
       statusText: row.containsKey('22')
           ? HtmlCellParser.stripHtml(row['22'])
           : defaultStatus,
+      vacancyCode:
+          row.containsKey('26') &&
+              (row['26'] ?? '').toString().trim().isNotEmpty
+          ? HtmlCellParser.stripHtml(row['26'])
+          : fallbackVacancyCode,
     );
   }
 }
@@ -279,21 +290,32 @@ class ApplicantFullProfile {
     }
 
     addDoc('Selfie KTP', 'ktp', 'selfie_ktp_applicant');
-    addDoc('Ijazah pendidikan', 'document/last_education',
-        'photo_education_applicant');
+    addDoc(
+      'Ijazah pendidikan',
+      'document/last_education',
+      'photo_education_applicant',
+    );
     addDoc('Paklaring kerja', 'document/last_job', 'photo_job_applicant');
     addDoc('SKCK', 'skck', 'upload_skck_applicant');
     addDoc('SIO', 'sio', 'upload_sio_applicant');
     addDoc('SIM', 'sim', 'upload_sim_applicant');
-    addDoc('Sertifikat kompetensi', 'certificate',
-        'upload_certificate_applicant');
-    addDoc('Sertifikat vaksin', 'certificate_vaccine',
-        'upload_certificate_vaccine_applicant');
+    addDoc(
+      'Sertifikat kompetensi',
+      'certificate',
+      'upload_certificate_applicant',
+    );
+    addDoc(
+      'Sertifikat vaksin',
+      'certificate_vaccine',
+      'upload_certificate_vaccine_applicant',
+    );
     addDoc('Kartu Keluarga (KK)', 'kk', 'upload_kk_applicant');
 
     return ApplicantFullProfile(
       id: str('id_applicant'),
-      fullName: combinedName.isEmpty ? 'Pelamar HK' : combinedName.toUpperCase(),
+      fullName: combinedName.isEmpty
+          ? 'Pelamar HK'
+          : combinedName.toUpperCase(),
       nik: str('nik_number'),
       phone: str('phone_applicant'),
       email: str('email_applicant'),

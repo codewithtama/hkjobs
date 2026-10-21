@@ -1,31 +1,24 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:hkjobs_mobile/features/app_update/data/apk_installer_service.dart';
 import 'package:hkjobs_mobile/features/app_update/domain/update_info.dart';
 
 void main() {
   group('UpdateInfo version comparison', () {
     test('detects newer patch version', () {
       expect(
-        UpdateInfo.isVersionNewer(
-          latestTag: 'v1.0.1',
-          currentVersion: '1.0.0',
-        ),
+        UpdateInfo.isVersionNewer(latestTag: 'v1.0.1', currentVersion: '1.0.0'),
         isTrue,
       );
     });
 
     test('detects newer minor and major versions', () {
       expect(
-        UpdateInfo.isVersionNewer(
-          latestTag: 'v1.1.0',
-          currentVersion: '1.0.9',
-        ),
+        UpdateInfo.isVersionNewer(latestTag: 'v1.1.0', currentVersion: '1.0.9'),
         isTrue,
       );
       expect(
-        UpdateInfo.isVersionNewer(
-          latestTag: 'v2.0.0',
-          currentVersion: '1.9.9',
-        ),
+        UpdateInfo.isVersionNewer(latestTag: 'v2.0.0', currentVersion: '1.9.9'),
         isTrue,
       );
     });
@@ -50,17 +43,11 @@ void main() {
 
     test('returns false when version is equal or older', () {
       expect(
-        UpdateInfo.isVersionNewer(
-          latestTag: 'v1.0.0',
-          currentVersion: '1.0.0',
-        ),
+        UpdateInfo.isVersionNewer(latestTag: 'v1.0.0', currentVersion: '1.0.0'),
         isFalse,
       );
       expect(
-        UpdateInfo.isVersionNewer(
-          latestTag: 'v1.0.0',
-          currentVersion: '1.0.1',
-        ),
+        UpdateInfo.isVersionNewer(latestTag: 'v1.0.0', currentVersion: '1.0.1'),
         isFalse,
       );
       expect(
@@ -78,7 +65,8 @@ void main() {
         'tag_name': 'v1.0.2',
         'name': 'Rilis Perbaikan Produksi 1.0.2',
         'body': 'Perbaikan fitur review dan penempatan.',
-        'html_url': 'https://github.com/codewithtama/hkjobs/releases/tag/v1.0.2',
+        'html_url':
+            'https://github.com/codewithtama/hkjobs/releases/tag/v1.0.2',
         'published_at': '2026-10-20T22:00:00Z',
         'assets': <Map<String, Object?>>[
           {
@@ -133,13 +121,21 @@ void main() {
       expect(info.hasUpdate, isTrue);
       expect(info.latestVersion, equals('1.0.1'));
       expect(info.currentVersion, equals('1.0.0+1'));
-      expect(
-        info.apkDownloadUrl,
+      expect(info.apkDownloadUrl,
         equals(
           'https://github.com/codewithtama/hkjobs/releases/download/v1.0.1/hkjobs-release.apk',
         ),
       );
       expect(info.releaseTitle, equals('Rilis v1.0.1 (Build 4)'));
+    });
+  });
+
+  group('ApkInstallerService tests', () {
+    TestWidgetsFlutterBinding.ensureInitialized();
+
+    test('isAndroid returns correct platform state', () {
+      final service = ApkInstallerService();
+      expect(service.isAndroid, equals(!kIsWeb && defaultTargetPlatform == TargetPlatform.android));
     });
   });
 }

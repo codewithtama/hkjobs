@@ -134,7 +134,10 @@ class _QrScannerScreenState extends State<QrScannerScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(title, style: sheetContext.textStyles.titleMedium),
+                          Text(
+                            title,
+                            style: sheetContext.textStyles.titleMedium,
+                          ),
                           Text(
                             typeLabel,
                             style: sheetContext.textStyles.bodySmall?.copyWith(
@@ -220,10 +223,7 @@ class _QrScannerScreenState extends State<QrScannerScreen> {
       body: Stack(
         alignment: Alignment.center,
         children: [
-          MobileScanner(
-            controller: _controller,
-            onDetect: _onDetect,
-          ),
+          MobileScanner(controller: _controller, onDetect: _onDetect),
           // Viewfinder overlay
           CustomPaint(
             size: Size.infinite,
@@ -283,17 +283,49 @@ class _ScannerOverlayPainter extends CustomPainter {
 
     const cornerLength = 24.0;
     // Top-left
-    canvas.drawLine(Offset(left, top + cornerLength), Offset(left, top + 16), cornerPaint);
-    canvas.drawLine(Offset(left + 16, top), Offset(left + cornerLength, top), cornerPaint);
+    canvas.drawLine(
+      Offset(left, top + cornerLength),
+      Offset(left, top + 16),
+      cornerPaint,
+    );
+    canvas.drawLine(
+      Offset(left + 16, top),
+      Offset(left + cornerLength, top),
+      cornerPaint,
+    );
     // Top-right
-    canvas.drawLine(Offset(left + scanSize - cornerLength, top), Offset(left + scanSize - 16, top), cornerPaint);
-    canvas.drawLine(Offset(left + scanSize, top + 16), Offset(left + scanSize, top + cornerLength), cornerPaint);
+    canvas.drawLine(
+      Offset(left + scanSize - cornerLength, top),
+      Offset(left + scanSize - 16, top),
+      cornerPaint,
+    );
+    canvas.drawLine(
+      Offset(left + scanSize, top + 16),
+      Offset(left + scanSize, top + cornerLength),
+      cornerPaint,
+    );
     // Bottom-left
-    canvas.drawLine(Offset(left, top + scanSize - cornerLength), Offset(left, top + scanSize - 16), cornerPaint);
-    canvas.drawLine(Offset(left + 16, top + scanSize), Offset(left + cornerLength, top + scanSize), cornerPaint);
+    canvas.drawLine(
+      Offset(left, top + scanSize - cornerLength),
+      Offset(left, top + scanSize - 16),
+      cornerPaint,
+    );
+    canvas.drawLine(
+      Offset(left + 16, top + scanSize),
+      Offset(left + cornerLength, top + scanSize),
+      cornerPaint,
+    );
     // Bottom-right
-    canvas.drawLine(Offset(left + scanSize - cornerLength, top + scanSize), Offset(left + scanSize - 16, top + scanSize), cornerPaint);
-    canvas.drawLine(Offset(left + scanSize, top + scanSize - 16), Offset(left + scanSize, top + scanSize - cornerLength), cornerPaint);
+    canvas.drawLine(
+      Offset(left + scanSize - cornerLength, top + scanSize),
+      Offset(left + scanSize - 16, top + scanSize),
+      cornerPaint,
+    );
+    canvas.drawLine(
+      Offset(left + scanSize, top + scanSize - 16),
+      Offset(left + scanSize, top + scanSize - cornerLength),
+      cornerPaint,
+    );
   }
 
   @override
