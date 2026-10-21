@@ -1,9 +1,9 @@
 {
-  "version": "1.0.3",
-  "buildNumber": "7",
-  "title": "Rilis v1.0.3 (Build 7)",
-  "releaseNotes": "Pembaruan rilis otomatis v1.0.3",
-  "apkUrl": "https://github.com/codewithtama/hkjobs/releases/download/v1.0.3/hkjobs-release.apk",
-  "htmlUrl": "https://github.com/codewithtama/hkjobs/releases/tag/v1.0.3",
-  "publishedAt": "2026-10-21T07:10:39Z"
+  "version": "1.0.4",
+  "buildNumber": "9",
+  "title": "Rilis v1.0.4 (Build 9)",
+  "releaseNotes": "Perbaikan posisi tombol Buat Lowongan & Buat Jadwal agar tidak menutupi bar navigasi paginasi, serta optimasi tata letak tombol aksi.",
+  "apkUrl": "https://github.com/codewithtama/hkjobs/releases/download/v1.0.4/hkjobs-release.apk",
+  "htmlUrl": "https://github.com/codewithtama/hkjobs/releases/tag/v1.0.4",
+  "publishedAt": "2026-10-21T00:30:00Z"
 }

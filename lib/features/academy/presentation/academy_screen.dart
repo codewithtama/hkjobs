@@ -143,8 +143,9 @@ class _AcademyScreenState extends ConsumerState<AcademyScreen> {
   @override
   Widget build(BuildContext context) {
     final asyncState = ref.watch(academyControllerProvider);
+    final viewState = asyncState.valueOrNull;
     final activeTab =
-        asyncState.valueOrNull?.activeTab ?? AcademySubTab.placementWaiting;
+        viewState?.activeTab ?? AcademySubTab.placementWaiting;
     final controller = ref.read(academyControllerProvider.notifier);
 
     Widget? buildFab() {
@@ -179,6 +180,14 @@ class _AcademyScreenState extends ConsumerState<AcademyScreen> {
 
     return Scaffold(
       floatingActionButton: buildFab(),
+      bottomNavigationBar: (viewState != null && viewState.totalCount > 0)
+          ? HkPaginationBar(
+              currentPage: viewState.page,
+              totalCount: viewState.totalCount,
+              pageSize: viewState.pageSize,
+              onPageChanged: controller.goToPage,
+            )
+          : null,
       body: Column(
         children: [
           Container(
@@ -228,31 +237,18 @@ class _AcademyScreenState extends ConsumerState<AcademyScreen> {
               ),
               data: (viewState) {
                 final rows = _rows(viewState, controller);
-                return Column(
-                  children: [
-                    Expanded(
-                      child: RefreshIndicator(
-                        onRefresh: controller.refresh,
-                        child: rows.isEmpty
-                            ? ListView(children: const [HkEmptyView()])
-                            : ListView.builder(
-                                padding: const EdgeInsets.all(16),
-                                itemCount: rows.length,
-                                itemBuilder: (context, i) => Padding(
-                                  padding: const EdgeInsets.only(bottom: 12),
-                                  child: _RowCard(data: rows[i]),
-                                ),
-                              ),
-                      ),
-                    ),
-                    if (viewState.totalCount > 0)
-                      HkPaginationBar(
-                        currentPage: viewState.page,
-                        totalCount: viewState.totalCount,
-                        pageSize: viewState.pageSize,
-                        onPageChanged: controller.goToPage,
-                      ),
-                  ],
+                return RefreshIndicator(
+                  onRefresh: controller.refresh,
+                  child: rows.isEmpty
+                      ? ListView(children: const [HkEmptyView()])
+                      : ListView.builder(
+                          padding: const EdgeInsets.fromLTRB(16, 16, 16, 80),
+                          itemCount: rows.length,
+                          itemBuilder: (context, i) => Padding(
+                            padding: const EdgeInsets.only(bottom: 12),
+                            child: _RowCard(data: rows[i]),
+                          ),
+                        ),
                 );
               },
             ),

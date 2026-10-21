@@ -82,20 +82,36 @@ class _RecruitmentScreenState extends ConsumerState<RecruitmentScreen> {
   @override
   Widget build(BuildContext context) {
     final asyncState = ref.watch(recruitmentControllerProvider);
+    final viewState = asyncState.valueOrNull;
     final activeTab =
-        asyncState.valueOrNull?.activeTab ?? RecruitmentSubTab.vacancies;
+        viewState?.activeTab ?? RecruitmentSubTab.vacancies;
 
     return Scaffold(
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () async {
-          final res = await context.push<bool>('/management/create-vacancy');
-          if (res == true && mounted) {
-            await ref.read(recruitmentControllerProvider.notifier).refresh();
-          }
-        },
-        icon: const Icon(Icons.add_rounded),
-        label: const Text('Buat Lowongan'),
-      ),
+      floatingActionButton: activeTab == RecruitmentSubTab.vacancies
+          ? FloatingActionButton.extended(
+              onPressed: () async {
+                final res =
+                    await context.push<bool>('/management/create-vacancy');
+                if (res == true && mounted) {
+                  await ref
+                      .read(recruitmentControllerProvider.notifier)
+                      .refresh();
+                }
+              },
+              icon: const Icon(Icons.add_rounded),
+              label: const Text('Buat Lowongan'),
+            )
+          : null,
+      bottomNavigationBar: (viewState != null && viewState.totalCount > 0)
+          ? HkPaginationBar(
+              currentPage: viewState.page,
+              totalCount: viewState.totalCount,
+              pageSize: viewState.pageSize,
+              onPageChanged: (p) => ref
+                  .read(recruitmentControllerProvider.notifier)
+                  .goToPage(p),
+            )
+          : null,
       body: Column(
         children: [
           Container(
@@ -231,26 +247,11 @@ class _RecruitmentScreenState extends ConsumerState<RecruitmentScreen> {
                 );
               },
               data: (viewState) {
-                return Column(
-                  children: [
-                    Expanded(
-                      child: RefreshIndicator(
-                        onRefresh: () => ref
-                            .read(recruitmentControllerProvider.notifier)
-                            .refresh(),
-                        child: _buildListContent(viewState),
-                      ),
-                    ),
-                    if (viewState.totalCount > 0)
-                      HkPaginationBar(
-                        currentPage: viewState.page,
-                        totalCount: viewState.totalCount,
-                        pageSize: viewState.pageSize,
-                        onPageChanged: (p) => ref
-                            .read(recruitmentControllerProvider.notifier)
-                            .goToPage(p),
-                      ),
-                  ],
+                return RefreshIndicator(
+                  onRefresh: () => ref
+                      .read(recruitmentControllerProvider.notifier)
+                      .refresh(),
+                  child: _buildListContent(viewState),
                 );
               },
             ),
@@ -265,7 +266,7 @@ class _RecruitmentScreenState extends ConsumerState<RecruitmentScreen> {
       case RecruitmentSubTab.vacancies:
         if (viewState.vacancies.isEmpty) return const HkEmptyView();
         return ListView.builder(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 80),
           itemCount: viewState.vacancies.length,
           itemBuilder: (context, index) {
             final item = viewState.vacancies[index];
@@ -289,7 +290,7 @@ class _RecruitmentScreenState extends ConsumerState<RecruitmentScreen> {
         if (grouped.isEmpty) return const HkEmptyView();
 
         return ListView.builder(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
           itemCount: grouped.length,
           itemBuilder: (context, groupIndex) {
             final entry = grouped.entries.elementAt(groupIndex);
@@ -332,7 +333,7 @@ class _RecruitmentScreenState extends ConsumerState<RecruitmentScreen> {
       case RecruitmentSubTab.existing:
         if (viewState.masterApplicants.isEmpty) return const HkEmptyView();
         return ListView.builder(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
           itemCount: viewState.masterApplicants.length,
           itemBuilder: (context, index) {
             final item = viewState.masterApplicants[index];

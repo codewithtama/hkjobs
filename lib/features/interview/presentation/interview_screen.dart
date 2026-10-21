@@ -78,20 +78,36 @@ class _InterviewScreenState extends ConsumerState<InterviewScreen> {
   @override
   Widget build(BuildContext context) {
     final asyncState = ref.watch(interviewControllerProvider);
+    final viewState = asyncState.valueOrNull;
     final activeTab =
-        asyncState.valueOrNull?.activeTab ?? InterviewSubTab.schedules;
+        viewState?.activeTab ?? InterviewSubTab.schedules;
 
     return Scaffold(
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () async {
-          final res = await context.push<bool>('/management/create-interview');
-          if (res == true && mounted) {
-            await ref.read(interviewControllerProvider.notifier).refresh();
-          }
-        },
-        icon: const Icon(Icons.add_rounded),
-        label: const Text('Buat Jadwal'),
-      ),
+      floatingActionButton: activeTab == InterviewSubTab.schedules
+          ? FloatingActionButton.extended(
+              onPressed: () async {
+                final res =
+                    await context.push<bool>('/management/create-interview');
+                if (res == true && mounted) {
+                  await ref
+                      .read(interviewControllerProvider.notifier)
+                      .refresh();
+                }
+              },
+              icon: const Icon(Icons.add_rounded),
+              label: const Text('Buat Jadwal'),
+            )
+          : null,
+      bottomNavigationBar: (viewState != null && viewState.totalCount > 0)
+          ? HkPaginationBar(
+              currentPage: viewState.page,
+              totalCount: viewState.totalCount,
+              pageSize: viewState.pageSize,
+              onPageChanged: (p) => ref
+                  .read(interviewControllerProvider.notifier)
+                  .goToPage(p),
+            )
+          : null,
       body: Column(
         children: [
           Container(
@@ -226,28 +242,13 @@ class _InterviewScreenState extends ConsumerState<InterviewScreen> {
                 );
               },
               data: (viewState) {
-                return Column(
-                  children: [
-                    Expanded(
-                      child: RefreshIndicator(
-                        onRefresh: () => ref
-                            .read(interviewControllerProvider.notifier)
-                            .refresh(),
-                        child: viewState.activeTab == InterviewSubTab.schedules
-                            ? _buildScheduleList(viewState.schedules)
-                            : _buildCandidateList(viewState),
-                      ),
-                    ),
-                    if (viewState.totalCount > 0)
-                      HkPaginationBar(
-                        currentPage: viewState.page,
-                        totalCount: viewState.totalCount,
-                        pageSize: viewState.pageSize,
-                        onPageChanged: (p) => ref
-                            .read(interviewControllerProvider.notifier)
-                            .goToPage(p),
-                      ),
-                  ],
+                return RefreshIndicator(
+                  onRefresh: () => ref
+                      .read(interviewControllerProvider.notifier)
+                      .refresh(),
+                  child: viewState.activeTab == InterviewSubTab.schedules
+                      ? _buildScheduleList(viewState.schedules)
+                      : _buildCandidateList(viewState),
                 );
               },
             ),
@@ -260,7 +261,7 @@ class _InterviewScreenState extends ConsumerState<InterviewScreen> {
   Widget _buildScheduleList(List<InterviewScheduleItem> items) {
     if (items.isEmpty) return const HkEmptyView();
     return ListView.builder(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 80),
       itemCount: items.length,
       itemBuilder: (context, index) {
         final item = items[index];
@@ -281,7 +282,7 @@ class _InterviewScreenState extends ConsumerState<InterviewScreen> {
     if (grouped.isEmpty) return const HkEmptyView();
 
     return ListView.builder(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
       itemCount: grouped.length,
       itemBuilder: (context, groupIndex) {
         final entry = grouped.entries.elementAt(groupIndex);
